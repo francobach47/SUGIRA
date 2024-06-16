@@ -1,0 +1,112 @@
+
+Format(s):
+B-Format (4 Channel Files)
+
+B-Format: Multichannel:
+
+    s1r2.wav
+
+Sample Rate: 96 kHz
+Number of Channels: 4
+Bits per Sample: 24
+Duration: 1.5 s
+File Size: 1.65 MB
+File Format: wav
+Source Sound: Genelec 8030, ESS 25 seconds, 20 Hz to 20 kHz
+Microphone: Soundfield ST350 Kit
+Source Location: Center of the stage
+Microphone Location: Center seat, middle row
+Source Receiver Distance (m): 7.6 m
+Source Height: 1.5 m
+Receiver Height: 3 m
+Temperature: 20 °C
+
+
+    s1r4.wav
+
+Sample Rate: 96 kHz
+Number of Channels: 4
+Bits per Sample: 24
+Duration: 1.5 s
+File Size: 1.65 MB
+File Format: wav
+Source Sound: Genelec 8030, ESS 25 seconds, 20 Hz to 20 kHz
+Microphone: Soundfield ST350 Kit
+Source Location: Center of the stage
+Microphone Location: Center, top row
+Source Receiver Distance (m): 12.9 m
+Source Height: 1.5 m
+Receiver Height: 4.5 m
+Temperature: 20 °C
+
+
+    s1r7.wav
+
+Sample Rate: 96 kHz
+Number of Channels: 4
+Bits per Sample: 24
+Duration: 1.5 s
+File Size: 1.65 MB
+File Format: wav
+Source Sound: Genelec 8030, ESS 25 seconds, 20 Hz to 20 kHz
+Microphone: Soundfield ST350 Kit
+Source Location: Center of the stage
+Microphone Location: Balcony, above and behind the source.
+Source Receiver Distance (m): 3.3 m
+Source Height: 1.5 m
+Receiver Height: 4.5 m
+Temperature: 20 °C
+
+
+    s2r4.wav
+
+Sample Rate: 96 kHz
+Number of Channels: 4
+Bits per Sample: 24
+Duration: 1.5 s
+File Size: 1.65 MB
+File Format: wav
+Source Sound: Genelec 8030, ESS 25 seconds, 20 Hz to 20 kHz
+Microphone: Soundfield ST350 Kit
+Source Location: Right corner of the stage, pointing towards the sweetspot on the center seat of the middle row.
+Microphone Location: Center, top row
+Source Receiver Distance (m): 13.5 m
+Source Height: 1.5 m
+Receiver Height: 4.5 m
+Temperature: 20 °C
+
+
+    s2r6.wav
+
+Sample Rate: 96 kHz
+Number of Channels: 4
+Bits per Sample: 24
+Duration: 1.5 s
+File Size: 1.65 MB
+File Format: wav
+Source Sound: Genelec 8030, ESS 25 seconds, 20 Hz to 20 kHz
+Microphone: Soundfield ST350 Kit
+Source Location: Right corner of the stage, pointing towards the sweetspot on the center seat of the middle row.
+Microphone Location: Right side up in the balcony.
+Source Receiver Distance (m): 9.5 m
+Source Height: 1.5 m
+Receiver Height: 3 m
+Temperature: 20 °C
+
+
+    s2r7.wav
+
+Sample Rate: 96 kHz
+Number of Channels: 4
+Bits per Sample: 24
+Duration: 1.5 s
+File Size: 1.65 MB
+File Format: wav
+Source Sound: Genelec 8030, ESS 25 seconds, 20 Hz to 20 kHz
+Microphone: Soundfield ST350 Kit
+Source Location: Right corner of the stage, pointing towards the sweetspot on the center seat of the middle row.
+Microphone Location: Above and behind the source. Up in the balcony.
+Source Receiver Distance (m): 4.1 m
+Source Height: 1.5 m
+Receiver Height: 4.5 m
+Temperature: 20 °C
