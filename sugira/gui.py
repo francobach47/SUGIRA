@@ -112,7 +112,7 @@ class MainWindowUI(object):
 
         # Basic configurations
         font_labels = QtGui.QFont()
-        font_labels.setFamily("Arial")
+        # font_labels.setFamily("Calibri")
         font_labels.setPointSize(13)
 
         vertical_space = QtWidgets.QSpacerItem(
@@ -136,13 +136,11 @@ class MainWindowUI(object):
             self.integration_options.addItem(int_window_time, integration_options[int_window_time])
         self.integration_options.setStyleSheet("""
             QComboBox {
-                font-family: 'Arial';
                 font-size: 12pt;
                 color: black;
                 background-color: rgb(255, 255, 255);
             }
             QComboBox QAbstractItemView {
-                font-family: 'Arial';
                 font-size: 12pt;
                 color: black;
                 background-color: rgb(255, 255, 255);
@@ -164,7 +162,6 @@ class MainWindowUI(object):
         self.analysis_length.setObjectName("analysis_length")
         self.analysis_length.setStyleSheet("""
             QLineEdit {
-                font-family: Arial;
                 font-size: 12pt;
                 color: black;
                 background-color: rgb(255, 255, 255);
@@ -186,7 +183,6 @@ class MainWindowUI(object):
         self.threshold.setObjectName("threshold")
         self.threshold.setStyleSheet("""
             QLineEdit {
-                font-family: Arial;
                 font-size: 12pt;
                 color: black;
                 background-color: rgb(255, 255, 255);
@@ -210,7 +206,6 @@ class MainWindowUI(object):
                 border-radius: 10px;
                 background: rgba(255, 99, 71, 0.6);
                 color: black;
-                font-family: Arial;
                 font-size: 12pt;
             }
             QPushButton:hover{
@@ -220,7 +215,7 @@ class MainWindowUI(object):
         """)
         self.pb_process.setObjectName("process_pb")
         self.pb_process.setCursor(QtCore.Qt.PointingHandCursor)
-        self.pb_process.clicked.connect(self.process_data)
+        self.pb_process.clicked.connect(self.plot_data)
 
         # Load Signals
         self.pb_load_signals = QtWidgets.QPushButton(self.frame_push_buttons)
@@ -232,7 +227,6 @@ class MainWindowUI(object):
                 border-radius: 10px;
                 background: rgb(180, 180, 180);
                 color: black;
-                font-family: Arial;
                 font-size: 12pt;
             }
             QPushButton:hover{
@@ -255,19 +249,36 @@ class MainWindowUI(object):
         # Plot Section
         self.frame_graphics = QtWidgets.QFrame(self.tab_main_window)
         self.frame_graphics.setFixedSize(1250, 800)
-        self.frame_graphics.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame_graphics.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame_graphics.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_graphics.setObjectName("frame_graphics")
 
         self.graphicsLayout = QtWidgets.QVBoxLayout(self.frame_graphics)
         self.graphicsLayout.setObjectName("graphicsLayout")
-
+        
         self.graphics_holder = QtWebEngineWidgets.QWebEngineView(self.frame_graphics)
+        self.graphics_holder.setStyleSheet("background-color: #1f1b24;")
         self.graphicsLayout.addWidget(self.graphics_holder)
+        html_content = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body {
+                        background-color: #1f1b24;
+                        margin: 0;
+                        padding: 0;
+                        overflow: hidden;
+                    }
+                </style>
+            </head>
+            </html>
+        """
+        self.graphics_holder.setHtml(html_content)
 
         self.horizontalLayout.addWidget(self.frame_graphics)
 
-        self.tabWidget.addTab(self.tab_main_window, "Main Window")
+        self.tabWidget.addTab(self.tab_main_window, "Main")
         self.verticalLayout2.addWidget(self.tabWidget)
 
         self.verticalLayout.addWidget(self.main_frame)
@@ -328,7 +339,6 @@ class MainWindowUI(object):
                 border-radius: 10px;
                 background: rgba(255, 99, 71, 0.6);
                 color: black;
-                font-family: Arial;
                 font-size: 12pt;
             }
             QPushButton:hover{
@@ -349,7 +359,6 @@ class MainWindowUI(object):
                 border-radius: 10px;
                 background: rgb(180, 180, 180);
                 color: black;
-                font-family: Arial;
                 font-size: 12pt;
             }
             QPushButton:hover{
@@ -370,7 +379,7 @@ class MainWindowUI(object):
         # PNG Display Section
         self.frame_graphics_plan = QtWidgets.QFrame(self.plan_section)
         self.frame_graphics_plan.setFixedSize(1250, 800)
-        self.frame_graphics_plan.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame_graphics_plan.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame_graphics_plan.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_graphics_plan.setObjectName("frame_graphics_plan")
 
@@ -409,7 +418,10 @@ class MainWindowUI(object):
         input_data = {**parameters, **signal_parameters}
         print(input_data)
         return input_data
-
+    
+    def plot_data(self):
+        url = QtCore.QUrl.fromLocalFile(str(Path("sugira.html").resolve()))
+        self.graphics_holder.load(url)
 
 class LoadSignalsWindow(QtWidgets.QWidget):
 
@@ -478,7 +490,6 @@ class LoadSignalsWindow(QtWidgets.QWidget):
                     border: 2px solid rgba(255, 99, 71, 1);
                 }
                 QLineEdit {
-                font-family: Arial;
                 font-size: 12pt;
                 color: black;
                 background-color: rgb(255, 255, 255);
@@ -516,7 +527,6 @@ class LoadSignalsWindow(QtWidgets.QWidget):
                 border-radius: 10px;
                 background: rgb(180, 180, 180);
                 color: black;
-                font-family: Arial;
                 font-size: 12pt;
             }
             QPushButton:hover{
@@ -535,7 +545,6 @@ class LoadSignalsWindow(QtWidgets.QWidget):
                 border-radius: 10px;
                 background: rgb(180, 180, 180);
                 color: black;
-                font-family: Arial;
                 font-size: 12pt;
             }
             QPushButton:hover{
@@ -554,7 +563,6 @@ class LoadSignalsWindow(QtWidgets.QWidget):
                 border-radius: 10px;
                 background: rgb(180, 180, 180);
                 color: black;
-                font-family: Arial;
                 font-size: 12pt;
             }
             QPushButton:hover{
@@ -785,6 +793,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
 
 
 if __name__ == "__main__":
+    sys.argv.append('--no-sandbox')
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = MainWindowUI()
