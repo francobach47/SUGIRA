@@ -34,8 +34,7 @@ class MainWindowUI(object):
         self.tabWidget = QtWidgets.QTabWidget(self.main_frame)
         self.tabWidget.setObjectName("tabWidget")
         self.tabWidget.setFixedSize(1640, 880)
-        self.tabWidget.setStyleSheet(
-            """
+        self.tabWidget.setStyleSheet("""
                 QTabWidget::pane {
                     background-color: red;
                     border: 2px solid #a0a0a0;
@@ -54,8 +53,7 @@ class MainWindowUI(object):
                     background-color: rgba(255, 99, 71, 0.6);
                     border-bottom: 2px solid rgba(255, 99, 71, 1);
                 }
-            """
-        )
+            """)
 
         self.tab_main_window = QtWidgets.QWidget()
         self.tab_main_window.setObjectName("tab_main")
@@ -88,28 +86,26 @@ class MainWindowUI(object):
 
         self.label_logo_main = QtWidgets.QLabel(self.frame_sugira_logo)
         self.label_logo_main.setText("SUGIRA Logo")
-        self.label_logo_main.setPixmap(QtGui.QPixmap(str(Path("docs/images/logo.png"))))
+        self.label_logo_main.setPixmap(
+            QtGui.QPixmap(str(Path("docs/images/logo.png")))
+        )
         self.label_logo_main.setScaledContents(True)
         self.label_logo_main.setObjectName("label_logo_main")
         self.label_logo_main.setMaximumSize(QtCore.QSize(300, 160))
 
-        self.logo_layout.addWidget(
-            self.label_logo_main, alignment=QtCore.Qt.AlignCenter
-        )
+        self.logo_layout.addWidget(self.label_logo_main, alignment=QtCore.Qt.AlignCenter)
         self.sugiraLogoVerticalLayout.addWidget(self.frame_sugira_logo)
 
         # User Parameters Section
         self.frame_analyze = QtWidgets.QFrame(self.frame_inputs)
         self.frame_analyze.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame_analyze.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_analyze.setStyleSheet(
-            """
+        self.frame_analyze.setStyleSheet("""
             QFrame#frame_analyze {
                 border: 2px solid #a0a0a0;
                 border-radius: 10px;
             }
-        """
-        )
+        """)
         self.frame_analyze.setObjectName("frame_analyze")
         self.verticalLayout_6 = QtWidgets.QVBoxLayout(self.frame_analyze)
         self.verticalLayout_6.setObjectName("verticalLayout_6")
@@ -137,11 +133,8 @@ class MainWindowUI(object):
             "10 ms": 10 * 10 ** (-3),
         }
         for int_window_time in integration_options:
-            self.integration_options.addItem(
-                int_window_time, integration_options[int_window_time]
-            )
-        self.integration_options.setStyleSheet(
-            """
+            self.integration_options.addItem(int_window_time, integration_options[int_window_time])
+        self.integration_options.setStyleSheet("""
             QComboBox {
                 font-family: 'Arial';
                 font-size: 12pt;
@@ -154,8 +147,7 @@ class MainWindowUI(object):
                 color: black;
                 background-color: rgb(255, 255, 255);
         }
-        """
-        )
+        """)
         self.verticalLayout_6.addWidget(self.integration_options)
         self.verticalLayout_6.addItem(vertical_space)
 
@@ -170,16 +162,14 @@ class MainWindowUI(object):
         self.analysis_length = QtWidgets.QLineEdit(self.frame_analyze)
         self.analysis_length.setText("500")
         self.analysis_length.setObjectName("analysis_length")
-        self.analysis_length.setStyleSheet(
-            """
+        self.analysis_length.setStyleSheet("""
             QLineEdit {
                 font-family: Arial;
                 font-size: 12pt;
                 color: black;
                 background-color: rgb(255, 255, 255);
             }
-        """
-        )
+        """)
         self.verticalLayout_6.addWidget(self.analysis_length)
         self.verticalLayout_6.addItem(vertical_space)
 
@@ -194,16 +184,14 @@ class MainWindowUI(object):
         self.threshold = QtWidgets.QLineEdit(self.frame_analyze)
         self.threshold.setText("-60")
         self.threshold.setObjectName("threshold")
-        self.threshold.setStyleSheet(
-            """
+        self.threshold.setStyleSheet("""
             QLineEdit {
                 font-family: Arial;
                 font-size: 12pt;
                 color: black;
                 background-color: rgb(255, 255, 255);
             }
-        """
-        )
+        """)
         self.verticalLayout_6.addWidget(self.threshold)
         self.verticalLayout_6.addItem(vertical_space)
 
@@ -216,8 +204,7 @@ class MainWindowUI(object):
         self.pb_process = QtWidgets.QPushButton(self.frame_push_buttons)
         self.pb_process.setText("Process")
         self.pb_process.setMinimumSize(QtCore.QSize(100, 40))
-        self.pb_process.setStyleSheet(
-            """
+        self.pb_process.setStyleSheet("""
             QPushButton{
                 border: 2px solid rgba(255, 99, 71, 1);
                 border-radius: 10px;
@@ -230,8 +217,7 @@ class MainWindowUI(object):
                 border: rgb(96, 133, 213);
                 background: rgba(255, 99, 71, 1);
             }
-        """
-        )
+        """)
         self.pb_process.setObjectName("process_pb")
         self.pb_process.setCursor(QtCore.Qt.PointingHandCursor)
         self.pb_process.clicked.connect(self.process_data)
@@ -240,8 +226,7 @@ class MainWindowUI(object):
         self.pb_load_signals = QtWidgets.QPushButton(self.frame_push_buttons)
         self.pb_load_signals.setText("Load Signals")
         self.pb_load_signals.setMinimumSize(QtCore.QSize(100, 40))
-        self.pb_load_signals.setStyleSheet(
-            """
+        self.pb_load_signals.setStyleSheet("""
             QPushButton{
                 border: 2px solid rgb(140, 140, 140);
                 border-radius: 10px;
@@ -254,8 +239,7 @@ class MainWindowUI(object):
                 border: rgb(96, 133, 213);
                 background: rgb(140, 140, 140);
             }
-        """
-        )
+        """)
 
         self.pb_load_signals.setObjectName("load_signals_pb")
         self.pb_load_signals.setCursor(QtCore.Qt.PointingHandCursor)
@@ -271,7 +255,6 @@ class MainWindowUI(object):
         # Plot Section
         self.frame_graphics = QtWidgets.QFrame(self.tab_main_window)
         self.frame_graphics.setFixedSize(1250, 800)
-        self.frame_graphics.setStyleSheet("background-color: white;")
         self.frame_graphics.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame_graphics.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_graphics.setObjectName("frame_graphics")
@@ -291,24 +274,132 @@ class MainWindowUI(object):
 
         # Plan View Section
         self.plan_section = QtWidgets.QWidget()
+        self.plan_section.setObjectName("plan_section")
+        self.horizontalLayout_plan = QtWidgets.QHBoxLayout(self.plan_section)
+        self.horizontalLayout_plan.setObjectName("horizontalLayout_plan")
+
+        self.frame_inputs_plan = QtWidgets.QFrame(self.plan_section)
+        self.frame_inputs_plan.setFixedSize(350, 700)
+        self.frame_inputs_plan.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.frame_inputs_plan.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame_inputs_plan.setObjectName("frame_inputs_plan")
+
+        # SUGIRA Logo for Plan Section
+        self.sugiraLogoVerticalLayout_plan = QtWidgets.QVBoxLayout(self.frame_inputs_plan)
+        self.sugiraLogoVerticalLayout_plan.setObjectName("sugiraLogoVerticalLayout_plan")
+        self.sugiraLogoVerticalLayout_plan.setContentsMargins(0, 0, 0, 0)
+        self.sugiraLogoVerticalLayout_plan.setSpacing(0)
+
+        self.frame_sugira_logo_plan = QtWidgets.QFrame(self.frame_inputs_plan)
+        self.frame_sugira_logo_plan.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.frame_sugira_logo_plan.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame_sugira_logo_plan.setFixedSize(350, 300)
+        self.frame_sugira_logo_plan.setObjectName("frame_sugira_logo_plan")
+
+        self.logo_layout_plan = QtWidgets.QVBoxLayout(self.frame_sugira_logo_plan)
+        self.logo_layout_plan.setContentsMargins(0, 0, 0, 0)
+        self.logo_layout_plan.setSpacing(0)
+        self.logo_layout_plan.setAlignment(QtCore.Qt.AlignCenter)
+
+        self.label_logo_plan = QtWidgets.QLabel(self.frame_sugira_logo_plan)
+        self.label_logo_plan.setText("SUGIRA Logo")
+        self.label_logo_plan.setPixmap(
+            QtGui.QPixmap(str(Path("docs/images/logo.png")))
+        )
+        self.label_logo_plan.setScaledContents(True)
+        self.label_logo_plan.setObjectName("label_logo_plan")
+        self.label_logo_plan.setMaximumSize(QtCore.QSize(300, 160))
+
+        self.logo_layout_plan.addWidget(self.label_logo_plan, alignment=QtCore.Qt.AlignCenter)
+        self.sugiraLogoVerticalLayout_plan.addWidget(self.frame_sugira_logo_plan)
+
+        # Push Buttons for Plan Section
+        self.frame_push_buttons_plan = QtWidgets.QFrame(self.frame_inputs_plan)
+        self.frame_push_buttons_plan.setLayout(QtWidgets.QVBoxLayout())
+        self.frame_push_buttons_plan.layout().setContentsMargins(0, 0, 0, 0)
+
+        # Load Plan
+        self.pb_load_plan = QtWidgets.QPushButton(self.frame_push_buttons_plan)
+        self.pb_load_plan.setText("Load Plan")
+        self.pb_load_plan.setMinimumSize(QtCore.QSize(100, 40))
+        self.pb_load_plan.setStyleSheet("""
+            QPushButton{
+                border: 2px solid rgba(255, 99, 71, 1);
+                border-radius: 10px;
+                background: rgba(255, 99, 71, 0.6);
+                color: black;
+                font-family: Arial;
+                font-size: 12pt;
+            }
+            QPushButton:hover{
+                border: rgb(96, 133, 213);
+                background: rgba(255, 99, 71, 1);
+            }
+        """)
+        self.pb_load_plan.setObjectName("load_plan_pb")
+        self.pb_load_plan.setCursor(QtCore.Qt.PointingHandCursor)
+
+        # Export
+        self.pb_export = QtWidgets.QPushButton(self.frame_push_buttons_plan)
+        self.pb_export.setText("Export")
+        self.pb_export.setMinimumSize(QtCore.QSize(100, 40))
+        self.pb_export.setStyleSheet("""
+            QPushButton{
+                border: 2px solid rgb(140, 140, 140);
+                border-radius: 10px;
+                background: rgb(180, 180, 180);
+                color: black;
+                font-family: Arial;
+                font-size: 12pt;
+            }
+            QPushButton:hover{
+                border: rgb(96, 133, 213);
+                background: rgb(140, 140, 140);
+            }
+        """)
+
+        self.pb_export.setObjectName("analyze_plan_pb")
+        self.pb_export.setCursor(QtCore.Qt.PointingHandCursor)
+
+        self.frame_push_buttons_plan.layout().addWidget(self.pb_load_plan)
+        self.frame_push_buttons_plan.layout().addWidget(self.pb_export)
+        self.sugiraLogoVerticalLayout_plan.addWidget(self.frame_push_buttons_plan)
+
+        self.horizontalLayout_plan.addWidget(self.frame_inputs_plan)
+
+        # PNG Display Section
+        self.frame_graphics_plan = QtWidgets.QFrame(self.plan_section)
+        self.frame_graphics_plan.setFixedSize(1250, 800)
+        self.frame_graphics_plan.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame_graphics_plan.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame_graphics_plan.setObjectName("frame_graphics_plan")
+
+        self.graphicsLayout_plan = QtWidgets.QVBoxLayout(self.frame_graphics_plan)
+        self.graphicsLayout_plan.setObjectName("graphicsLayout_plan")
+
+        self.label_image_plan = QtWidgets.QLabel(self.frame_graphics_plan)
+        self.label_image_plan.setScaledContents(True)
+        self.label_image_plan.setObjectName("label_image_plan")
+        self.graphicsLayout_plan.addWidget(self.label_image_plan)
+
+        self.horizontalLayout_plan.addWidget(self.frame_graphics_plan)
+
         self.tabWidget.addTab(self.plan_section, "Plan View")
 
         MainWindow.setCentralWidget(self.centralWidget)
 
     def load_signals(self):
         # TO DO: Si la ventana está abierta, que no se abra devuelta.
-        if not hasattr(self, "load_window") or not self.load_window.isVisible():
+        if not hasattr(self, 'load_window') or not self.load_window.isVisible():
             self.load_window = LoadSignalsWindow()
-            self.load_window.signals_collected.connect(
-                self.load_window.update_signal_paths
-            )
+            self.load_window.signals_collected.connect(self.load_window.update_signal_paths)
             self.load_window.show()
 
     def collect_main_parameters(self):
         return {
             "Integration Window": self.integration_options.currentData(),
             "Analysis Length": float(self.analysis_length.text()),
-            "Threshold": float(self.threshold.text()),
+            "Threshold": float(self.threshold.text())
         }
 
     def process_data(self):
@@ -341,9 +432,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
         self.lss_with_if_tab = QtWidgets.QWidget()
         self.tab_widget.addTab(self.a_format_tab, "A-Format")
         self.tab_widget.addTab(self.b_format_tab, "B-Format")
-        self.tab_widget.addTab(
-            self.lss_with_if_tab, "Logarithmic Sine Sweep with Inverse Filter"
-        )
+        self.tab_widget.addTab(self.lss_with_if_tab, "Logarithmic Sine Sweep with Inverse Filter")
 
         self.a_format_layout = QtWidgets.QVBoxLayout(self.a_format_tab)
         self.a_format_layout.setAlignment(QtCore.Qt.AlignTop)
@@ -351,8 +440,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
         self.b_format_layout.setAlignment(QtCore.Qt.AlignTop)
         self.lss_with_if_layout = QtWidgets.QVBoxLayout(self.lss_with_if_tab)
 
-        self.tab_widget.setStyleSheet(
-            """
+        self.tab_widget.setStyleSheet("""
                 QTabWidget::tab-bar {
                     alignment: center;
                 }
@@ -409,8 +497,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
                     background-color: rgba(255, 99, 71, 0.6);
                     border: 2px solid rgba(255, 99, 71, 1);
                 }
-            """
-        )
+            """)
 
         self.a_format_paths()
         self.b_format_paths()
@@ -423,8 +510,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
 
         self.ok_button = QtWidgets.QPushButton("Ok")
         self.ok_button.setFixedSize(QtCore.QSize(150, 30))
-        self.ok_button.setStyleSheet(
-            """
+        self.ok_button.setStyleSheet("""
             QPushButton{
                 border: 2px solid rgb(140, 140, 140);
                 border-radius: 10px;
@@ -437,15 +523,13 @@ class LoadSignalsWindow(QtWidgets.QWidget):
                 border: rgb(96, 133, 213);
                 background: rgb(140, 140, 140);
             }
-        """
-        )
+        """)
         self.ok_button.setCursor(QtCore.Qt.PointingHandCursor)
         self.ok_button.clicked.connect(self.ok_button_clicked)
 
         self.clean_button = QtWidgets.QPushButton("Clean")
         self.clean_button.setFixedSize(QtCore.QSize(150, 30))
-        self.clean_button.setStyleSheet(
-            """
+        self.clean_button.setStyleSheet("""
             QPushButton{
                 border: 2px solid rgb(140, 140, 140);
                 border-radius: 10px;
@@ -458,15 +542,13 @@ class LoadSignalsWindow(QtWidgets.QWidget):
                 border: rgb(96, 133, 213);
                 background: rgb(140, 140, 140);
             }
-        """
-        )
+        """)
         self.clean_button.setCursor(QtCore.Qt.PointingHandCursor)
         self.clean_button.clicked.connect(self.clean_button_clicked)
 
         self.cancel_button = QtWidgets.QPushButton("Cancel")
         self.cancel_button.setFixedSize(QtCore.QSize(150, 30))
-        self.cancel_button.setStyleSheet(
-            """
+        self.cancel_button.setStyleSheet("""
             QPushButton{
                 border: 2px solid rgb(140, 140, 140);
                 border-radius: 10px;
@@ -479,8 +561,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
                 border: rgb(96, 133, 213);
                 background: rgb(140, 140, 140);
             }
-        """
-        )
+        """)
         self.cancel_button.setCursor(QtCore.Qt.PointingHandCursor)
         self.cancel_button.clicked.connect(self.cancel_button_clicked)
 
@@ -525,9 +606,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
     def lss_with_if_paths(self):
         self.lss_with_if_grid_layout = QtWidgets.QGridLayout()
         self.lss_with_if_layout.addLayout(self.lss_with_if_grid_layout)
-        self.grid_lss_if(
-            self.lss_with_if_grid_layout, ["FLU", "FRD", "BRU", "BLD", "IF"]
-        )
+        self.grid_lss_if(self.lss_with_if_grid_layout, ["FLU", "FRD", "BRU", "BLD", "IF"])
 
     def grid_lss_if(self, layout, signals):
         for row, signal_name in enumerate(signals):
@@ -538,9 +617,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
             path_line_edit = QtWidgets.QLineEdit()
             path_line_edit.setReadOnly(True)
 
-            browse_button.clicked.connect(
-                lambda state, le=path_line_edit: self.browse_file(le)
-            )
+            browse_button.clicked.connect(lambda state, le=path_line_edit: self.browse_file(le))
 
             layout.addWidget(label, row, 0)
             layout.addWidget(browse_button, row, 1)
@@ -555,9 +632,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
             path_line_edit = QtWidgets.QLineEdit()
             path_line_edit.setReadOnly(True)
 
-            browse_button.clicked.connect(
-                lambda state, le=path_line_edit: self.browse_file(le)
-            )
+            browse_button.clicked.connect(lambda state, le=path_line_edit: self.browse_file(le))
 
             signal_layout = QtWidgets.QHBoxLayout()
             signal_layout.addWidget(label)
@@ -576,14 +651,10 @@ class LoadSignalsWindow(QtWidgets.QWidget):
                 line_edit.setText(selected_files[0])
 
     def update_a_format_widgets(self):
-        self.update_signal_widgets(
-            self.a_format_signal_layout, self.a_format_4_channel_radio.isChecked()
-        )
+        self.update_signal_widgets(self.a_format_signal_layout, self.a_format_4_channel_radio.isChecked())
 
     def update_b_format_widgets(self):
-        self.update_signal_widgets(
-            self.b_format_signal_layout, self.b_format_4_channel_radio.isChecked()
-        )
+        self.update_signal_widgets(self.b_format_signal_layout, self.b_format_4_channel_radio.isChecked())
 
     def update_signal_widgets(self, layout, is_4_channel):
         self.hide_signal_widgets(layout)
@@ -613,11 +684,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
         self.close()
 
     def clear_all_signal_paths(self):
-        for layout in [
-            self.a_format_signal_layout,
-            self.b_format_signal_layout,
-            self.lss_with_if_layout,
-        ]:
+        for layout in [self.a_format_signal_layout, self.b_format_signal_layout, self.lss_with_if_layout]:
             self.clear_signal_paths(layout)
 
     def clear_signal_paths(self, layout):
@@ -648,90 +715,40 @@ class LoadSignalsWindow(QtWidgets.QWidget):
             signal_parameters = {
                 "Format": "A-Format",
                 "Channels": 4,
-                "FLU Path": self.a_format_signal_layout.itemAt(0)
-                .layout()
-                .itemAt(2)
-                .widget()
-                .text(),
-                "FRD Path": self.a_format_signal_layout.itemAt(1)
-                .layout()
-                .itemAt(2)
-                .widget()
-                .text(),
-                "BRU Path": self.a_format_signal_layout.itemAt(2)
-                .layout()
-                .itemAt(2)
-                .widget()
-                .text(),
-                "BLD Path": self.a_format_signal_layout.itemAt(3)
-                .layout()
-                .itemAt(2)
-                .widget()
-                .text(),
+                "FLU Path": self.a_format_signal_layout.itemAt(0).layout().itemAt(2).widget().text(),
+                "FRD Path": self.a_format_signal_layout.itemAt(1).layout().itemAt(2).widget().text(),
+                "BRU Path": self.a_format_signal_layout.itemAt(2).layout().itemAt(2).widget().text(),
+                "BLD Path": self.a_format_signal_layout.itemAt(3).layout().itemAt(2).widget().text(),
             }
         elif signal_type == "a-format-1-channel":
             signal_parameters = {
                 "Format": "A-Format",
                 "Channels": 1,
-                "Signal Path": self.a_format_signal_layout.itemAt(0)
-                .layout()
-                .itemAt(2)
-                .widget()
-                .text(),
+                "Signal Path": self.a_format_signal_layout.itemAt(0).layout().itemAt(2).widget().text(),
             }
         elif signal_type == "b-format-4-channel":
             signal_parameters = {
                 "Format": "B-Format",
                 "Channels": 4,
-                "FLU Path": self.b_format_signal_layout.itemAt(0)
-                .layout()
-                .itemAt(2)
-                .widget()
-                .text(),
-                "FRD Path": self.b_format_signal_layout.itemAt(1)
-                .layout()
-                .itemAt(2)
-                .widget()
-                .text(),
-                "BRU Path": self.b_format_signal_layout.itemAt(2)
-                .layout()
-                .itemAt(2)
-                .widget()
-                .text(),
-                "BLD Path": self.b_format_signal_layout.itemAt(3)
-                .layout()
-                .itemAt(2)
-                .widget()
-                .text(),
+                "FLU Path": self.b_format_signal_layout.itemAt(0).layout().itemAt(2).widget().text(),
+                "FRD Path": self.b_format_signal_layout.itemAt(1).layout().itemAt(2).widget().text(),
+                "BRU Path": self.b_format_signal_layout.itemAt(2).layout().itemAt(2).widget().text(),
+                "BLD Path": self.b_format_signal_layout.itemAt(3).layout().itemAt(2).widget().text(),
             }
         elif signal_type == "b-format-1-channel":
             signal_parameters = {
                 "Format": "B-Format",
                 "Channels": 1,
-                "Signal Path": self.b_format_signal_layout.itemAt(0)
-                .layout()
-                .itemAt(2)
-                .widget()
-                .text(),
+                "Signal Path": self.b_format_signal_layout.itemAt(0).layout().itemAt(2).widget().text(),
             }
         elif signal_type == "lss-format":
             signal_parameters = {
                 "Format": "LSS with IF",
-                "FLU Path": self.lss_with_if_grid_layout.itemAtPosition(0, 2)
-                .widget()
-                .text(),
-                "FRD Path": self.lss_with_if_grid_layout.itemAtPosition(1, 2)
-                .widget()
-                .text(),
-                "BRU Path": self.lss_with_if_grid_layout.itemAtPosition(2, 2)
-                .widget()
-                .text(),
-                "BLD Path": self.lss_with_if_grid_layout.itemAtPosition(3, 2)
-                .widget()
-                .text(),
-                "IF Path": self.lss_with_if_grid_layout.itemAtPosition(4, 2)
-                .widget()
-                .text(),
+                "FLU Path": self.lss_with_if_grid_layout.itemAtPosition(0, 2).widget().text(),
+                "FRD Path": self.lss_with_if_grid_layout.itemAtPosition(1, 2).widget().text(),
+                "BRU Path": self.lss_with_if_grid_layout.itemAtPosition(2, 2).widget().text(),
+                "BLD Path": self.lss_with_if_grid_layout.itemAtPosition(3, 2).widget().text(),
+                "IF Path": self.lss_with_if_grid_layout.itemAtPosition(4, 2).widget().text(),
             }
 
         return signal_parameters
@@ -743,58 +760,28 @@ class LoadSignalsWindow(QtWidgets.QWidget):
 
             if format_type == "A-Format":
                 if channels == 4:
-                    self.a_format_signal_layout.itemAt(0).layout().itemAt(
-                        2
-                    ).widget().setText(signal_parameters.get("FLU Path", ""))
-                    self.a_format_signal_layout.itemAt(1).layout().itemAt(
-                        2
-                    ).widget().setText(signal_parameters.get("FRD Path", ""))
-                    self.a_format_signal_layout.itemAt(2).layout().itemAt(
-                        2
-                    ).widget().setText(signal_parameters.get("BRU Path", ""))
-                    self.a_format_signal_layout.itemAt(3).layout().itemAt(
-                        2
-                    ).widget().setText(signal_parameters.get("BLD Path", ""))
+                    self.a_format_signal_layout.itemAt(0).layout().itemAt(2).widget().setText(signal_parameters.get("FLU Path", ""))
+                    self.a_format_signal_layout.itemAt(1).layout().itemAt(2).widget().setText(signal_parameters.get("FRD Path", ""))
+                    self.a_format_signal_layout.itemAt(2).layout().itemAt(2).widget().setText(signal_parameters.get("BRU Path", ""))
+                    self.a_format_signal_layout.itemAt(3).layout().itemAt(2).widget().setText(signal_parameters.get("BLD Path", ""))
                 else:
-                    self.a_format_signal_layout.itemAt(0).layout().itemAt(
-                        2
-                    ).widget().setText(signal_parameters.get("Signal Path", ""))
+                    self.a_format_signal_layout.itemAt(0).layout().itemAt(2).widget().setText(signal_parameters.get("Signal Path", ""))
 
             elif format_type == "B-Format":
                 if channels == 4:
-                    self.b_format_signal_layout.itemAt(0).layout().itemAt(
-                        2
-                    ).widget().setText(signal_parameters.get("FLU Path", ""))
-                    self.b_format_signal_layout.itemAt(1).layout().itemAt(
-                        2
-                    ).widget().setText(signal_parameters.get("FRD Path", ""))
-                    self.b_format_signal_layout.itemAt(2).layout().itemAt(
-                        2
-                    ).widget().setText(signal_parameters.get("BRU Path", ""))
-                    self.b_format_signal_layout.itemAt(3).layout().itemAt(
-                        2
-                    ).widget().setText(signal_parameters.get("BLD Path", ""))
+                    self.b_format_signal_layout.itemAt(0).layout().itemAt(2).widget().setText(signal_parameters.get("FLU Path", ""))
+                    self.b_format_signal_layout.itemAt(1).layout().itemAt(2).widget().setText(signal_parameters.get("FRD Path", ""))
+                    self.b_format_signal_layout.itemAt(2).layout().itemAt(2).widget().setText(signal_parameters.get("BRU Path", ""))
+                    self.b_format_signal_layout.itemAt(3).layout().itemAt(2).widget().setText(signal_parameters.get("BLD Path", ""))
                 else:
-                    self.b_format_signal_layout.itemAt(0).layout().itemAt(
-                        2
-                    ).widget().setText(signal_parameters.get("Signal Path", ""))
+                    self.b_format_signal_layout.itemAt(0).layout().itemAt(2).widget().setText(signal_parameters.get("Signal Path", ""))
 
             elif format_type == "LSS with IF":
-                self.lss_with_if_grid_layout.itemAtPosition(0, 2).widget().setText(
-                    signal_parameters.get("FLU Path", "")
-                )
-                self.lss_with_if_grid_layout.itemAtPosition(1, 2).widget().setText(
-                    signal_parameters.get("FRD Path", "")
-                )
-                self.lss_with_if_grid_layout.itemAtPosition(2, 2).widget().setText(
-                    signal_parameters.get("BRU Path", "")
-                )
-                self.lss_with_if_grid_layout.itemAtPosition(3, 2).widget().setText(
-                    signal_parameters.get("BLD Path", "")
-                )
-                self.lss_with_if_grid_layout.itemAtPosition(4, 2).widget().setText(
-                    signal_parameters.get("IF Path", "")
-                )
+                self.lss_with_if_grid_layout.itemAtPosition(0, 2).widget().setText(signal_parameters.get("FLU Path", ""))
+                self.lss_with_if_grid_layout.itemAtPosition(1, 2).widget().setText(signal_parameters.get("FRD Path", ""))
+                self.lss_with_if_grid_layout.itemAtPosition(2, 2).widget().setText(signal_parameters.get("BRU Path", ""))
+                self.lss_with_if_grid_layout.itemAtPosition(3, 2).widget().setText(signal_parameters.get("BLD Path", ""))
+                self.lss_with_if_grid_layout.itemAtPosition(4, 2).widget().setText(signal_parameters.get("IF Path", ""))
 
 
 if __name__ == "__main__":
