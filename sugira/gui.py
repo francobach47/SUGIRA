@@ -2,14 +2,17 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5 import QtWebEngineWidgets
 import sys
 from pathlib import Path
-
+import threading 
+from typing import List
+from engine.input import InputFormat
+from core import SeaUrchinAnalyzer
 
 class MainWindowUI(object):
     def main_window_config(self, MainWindow: QtWidgets.QMainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setFixedSize(QtCore.QSize(1700, 900))
         MainWindow.setWindowTitle("SUGIRA")
-        MainWindow.setWindowIcon(QtGui.QIcon("docs/icons/sugira_icon.png"))
+        MainWindow.setWindowIcon(QtGui.QIcon("docs/images/sugira_icon.png"))
 
         self.centralWidget = QtWidgets.QWidget(MainWindow)
         self.centralWidget.setStyleSheet("background-color:#1f1b24 ; ")
@@ -87,7 +90,7 @@ class MainWindowUI(object):
         self.label_logo_main = QtWidgets.QLabel(self.frame_sugira_logo)
         self.label_logo_main.setText("SUGIRA Logo")
         self.label_logo_main.setPixmap(
-            QtGui.QPixmap(str(Path("docs/images/logo.png")))
+            QtGui.QPixmap(str(Path("docs/images/sugira_logo.png")))
         )
         self.label_logo_main.setScaledContents(True)
         self.label_logo_main.setObjectName("label_logo_main")
@@ -158,7 +161,7 @@ class MainWindowUI(object):
         self.label_analysis_length.setStyleSheet("color: rgb(224, 224, 224);")
         self.verticalLayout_6.addWidget(self.label_analysis_length)
         self.analysis_length = QtWidgets.QLineEdit(self.frame_analyze)
-        self.analysis_length.setText("500")
+        self.analysis_length.setText("300")
         self.analysis_length.setObjectName("analysis_length")
         self.analysis_length.setStyleSheet("""
             QLineEdit {
@@ -215,7 +218,7 @@ class MainWindowUI(object):
         """)
         self.pb_process.setObjectName("process_pb")
         self.pb_process.setCursor(QtCore.Qt.PointingHandCursor)
-        self.pb_process.clicked.connect(self.plot_data)
+        self.pb_process.clicked.connect(self.process_data)
 
         # Load Signals
         self.pb_load_signals = QtWidgets.QPushButton(self.frame_push_buttons)
@@ -259,22 +262,8 @@ class MainWindowUI(object):
         self.graphics_holder = QtWebEngineWidgets.QWebEngineView(self.frame_graphics)
         self.graphics_holder.setStyleSheet("background-color: #1f1b24;")
         self.graphicsLayout.addWidget(self.graphics_holder)
-        html_content = """
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <style>
-                    body {
-                        background-color: #1f1b24;
-                        margin: 0;
-                        padding: 0;
-                        overflow: hidden;
-                    }
-                </style>
-            </head>
-            </html>
-        """
-        self.graphics_holder.setHtml(html_content)
+        url = QtCore.QUrl.fromLocalFile(str(Path("docs/background.html").resolve()))
+        self.graphics_holder.load(url)
 
         self.horizontalLayout.addWidget(self.frame_graphics)
 
@@ -315,7 +304,7 @@ class MainWindowUI(object):
         self.label_logo_plan = QtWidgets.QLabel(self.frame_sugira_logo_plan)
         self.label_logo_plan.setText("SUGIRA Logo")
         self.label_logo_plan.setPixmap(
-            QtGui.QPixmap(str(Path("docs/images/logo.png")))
+            QtGui.QPixmap(str(Path("docs/images/sugira_logo.png")))
         )
         self.label_logo_plan.setScaledContents(True)
         self.label_logo_plan.setObjectName("label_logo_plan")
@@ -398,32 +387,50 @@ class MainWindowUI(object):
         MainWindow.setCentralWidget(self.centralWidget)
 
     def load_signals(self):
-        # TO DO: Si la ventana está abierta, que no se abra devuelta.
         if not hasattr(self, 'load_window') or not self.load_window.isVisible():
             self.load_window = LoadSignalsWindow()
-            self.load_window.signals_collected.connect(self.load_window.update_signal_paths)
+            # self.load_window.signals_collected.connect(self.load_window.update_signal_paths)
             self.load_window.show()
 
     def collect_main_parameters(self):
         return {
             "Integration Window": self.integration_options.currentData(),
-            "Analysis Length": float(self.analysis_length.text()),
+            "Analysis Length": float(self.analysis_length.text()) * 10 ** (-3),
             "Threshold": float(self.threshold.text())
         }
 
     def process_data(self):
         # TO DO: CHEQUEAR QUE TODAS LAS SEÑALES DEL DICCIONARIO TIENEN UN PATH ASOCIADO.
-        parameters = self.collect_main_parameters()
-        signal_parameters = self.load_window.collect_signal_parameters()
-        input_data = {**parameters, **signal_parameters}
-        print(input_data)
-        return input_data
-    
-    def plot_data(self):
+        signal_parameters = self.collect_main_parameters()
+        input_data = self.load_window.collect_signal_parameters()
+        analyzer = SeaUrchinAnalyzer()
+        fig = analyzer.analyze(
+                input_dict = input_data,
+                integration_time = signal_parameters["Integration Window"],
+                intensity_threshold = signal_parameters["Threshold"],
+                analysis_length = signal_parameters["Analysis Length"],
+                show=False,
+        )
+        # analyzer.export_xy_projection(fig, "projection_X.png")
         url = QtCore.QUrl.fromLocalFile(str(Path("sugira.html").resolve()))
         self.graphics_holder.load(url)
+        self.plotly_fig = fig
+        
+    # def capture_screenshot(self):
+    #     # Wait for a short moment to ensure the page is fully rendered
+    #     QtCore.QTimer.singleShot(5000, self.save_screenshot)
+
+    # def save_screenshot(self):
+    #     image = self.graphics_holder.grab()
+    #     file_path = "screenshot.png"
+    #     image.save(file_path)
+    #     print(f"Screenshot saved to {file_path}")
+
 
 class LoadSignalsWindow(QtWidgets.QWidget):
+    """
+    Class associated with the window to load the signals with their respective style and associated methods.    
+    """
 
     signals_collected = QtCore.pyqtSignal(dict)
 
@@ -431,20 +438,20 @@ class LoadSignalsWindow(QtWidgets.QWidget):
         super().__init__()
         self.setWindowTitle("Load Signals")
         self.setFixedSize(QtCore.QSize(600, 280))
-        self.setWindowIcon(QtGui.QIcon("docs/icons/sugira_icon.png"))
+        self.setWindowIcon(QtGui.QIcon("docs/images/sugira_icon.png"))
         self.setStyleSheet("background-color:#1f1b24;")
 
-        self.main_layout = QtWidgets.QVBoxLayout(self)
+        self.mainLayout = QtWidgets.QVBoxLayout(self)
 
-        self.tab_widget = QtWidgets.QTabWidget()
-        self.main_layout.addWidget(self.tab_widget)
+        self.tabWidget = QtWidgets.QTabWidget()
+        self.mainLayout.addWidget(self.tabWidget)
 
         self.a_format_tab = QtWidgets.QWidget()
         self.b_format_tab = QtWidgets.QWidget()
         self.lss_with_if_tab = QtWidgets.QWidget()
-        self.tab_widget.addTab(self.a_format_tab, "A-Format")
-        self.tab_widget.addTab(self.b_format_tab, "B-Format")
-        self.tab_widget.addTab(self.lss_with_if_tab, "Logarithmic Sine Sweep with Inverse Filter")
+        self.tabWidget.addTab(self.a_format_tab, "A-Format")
+        self.tabWidget.addTab(self.b_format_tab, "B-Format")
+        self.tabWidget.addTab(self.lss_with_if_tab, "Logarithmic Sine Sweep with Inverse Filter")
 
         self.a_format_layout = QtWidgets.QVBoxLayout(self.a_format_tab)
         self.a_format_layout.setAlignment(QtCore.Qt.AlignTop)
@@ -452,7 +459,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
         self.b_format_layout.setAlignment(QtCore.Qt.AlignTop)
         self.lss_with_if_layout = QtWidgets.QVBoxLayout(self.lss_with_if_tab)
 
-        self.tab_widget.setStyleSheet("""
+        self.tabWidget.setStyleSheet("""
                 QTabWidget::tab-bar {
                     alignment: center;
                 }
@@ -510,15 +517,87 @@ class LoadSignalsWindow(QtWidgets.QWidget):
                 }
             """)
 
-        self.a_format_paths()
-        self.b_format_paths()
-        self.lss_with_if_paths()
+        self.a_format()
+        self.b_format()
+        self.lss_with_if()
 
         self.add_bottom_buttons()
 
+    def a_format(self):
+        self.a_format_channel_layout = QtWidgets.QGridLayout()
+        self.a_format_channel = QtWidgets.QButtonGroup(self)
+        self.a_format_4_channel_radio = QtWidgets.QRadioButton("4 Channel")
+        self.a_format_1_channel_radio = QtWidgets.QRadioButton("1 Channel")
+        self.a_format_channel.addButton(self.a_format_4_channel_radio)
+        self.a_format_channel.addButton(self.a_format_1_channel_radio)
+        self.a_format_channel_layout.addWidget(self.a_format_4_channel_radio, 0, 0)
+        self.a_format_channel_layout.addWidget(self.a_format_1_channel_radio, 0, 1)
+        self.a_format_channel_layout.addItem(QtWidgets.QSpacerItem(20, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum), 0, 2)
+        self.a_format_layout.addLayout(self.a_format_channel_layout)
+        self.a_format_signal_layout = QtWidgets.QGridLayout()
+        self.a_format_4_channel_radio.toggled.connect(lambda checked: self.signals_browser(self.a_format_signal_layout, ["FLU", "FRD", "BRU", "BLD"]) if checked else self.hide_signal_widgets(self.a_format_signal_layout))
+        self.a_format_1_channel_radio.toggled.connect(lambda checked: self.signals_browser(self.a_format_signal_layout, ["Signal"]) if checked else self.hide_signal_widgets(self.a_format_signal_layout))
+        self.a_format_layout.addLayout(self.a_format_signal_layout)
+        self.hide_signal_widgets(self.a_format_signal_layout)
+
+    def b_format(self):
+        self.b_format_channel_layout = QtWidgets.QGridLayout()
+        self.b_format_channel = QtWidgets.QButtonGroup(self)
+        self.b_format_4_channel_radio = QtWidgets.QRadioButton("4 Channel")
+        self.b_format_1_channel_radio = QtWidgets.QRadioButton("1 Channel")
+        self.b_format_channel.addButton(self.b_format_4_channel_radio)
+        self.b_format_channel.addButton(self.b_format_1_channel_radio)
+        self.b_format_channel_layout.addWidget(self.b_format_4_channel_radio, 0, 0)
+        self.b_format_channel_layout.addWidget(self.b_format_1_channel_radio, 0, 1)
+        self.b_format_channel_layout.addItem(QtWidgets.QSpacerItem(20, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum), 0, 2)
+        self.b_format_layout.addLayout(self.b_format_channel_layout)
+        self.b_format_signal_layout = QtWidgets.QGridLayout()
+        self.b_format_4_channel_radio.toggled.connect(lambda checked: self.signals_browser(self.b_format_signal_layout, ["X", "Y", "Z", "W"]) if checked else self.hide_signal_widgets(self.b_format_signal_layout))
+        self.b_format_1_channel_radio.toggled.connect(lambda checked: self.signals_browser(self.b_format_signal_layout, ["Signal"]) if checked else self.hide_signal_widgets(self.b_format_signal_layout))
+        self.b_format_layout.addLayout(self.b_format_signal_layout)
+        self.hide_signal_widgets(self.b_format_signal_layout)
+
+    def lss_with_if(self):
+        self.lss_with_if_grid_layout = QtWidgets.QGridLayout()
+        self.lss_with_if_layout.addLayout(self.lss_with_if_grid_layout)
+        self.signals_browser(self.lss_with_if_grid_layout, ["FLU", "FRD", "BRU", "BLD", "IF"])
+
+    def signals_browser(self, layout: QtWidgets.QGridLayout, signals: List[str]):
+        for row, signal_name in enumerate(signals):
+            label = QtWidgets.QLabel(f"{signal_name}:")
+            browse_button = QtWidgets.QPushButton("")
+            browse_button.setIcon(QtGui.QIcon("docs/images/open_folder_icon.png"))
+            browse_button.setCursor(QtCore.Qt.PointingHandCursor)
+            path_line_edit = QtWidgets.QLineEdit()
+            path_line_edit.setReadOnly(True)
+
+            browse_button.clicked.connect(lambda state, le=path_line_edit, sig=signal_name: self.browse_file(le, sig))
+
+            layout.addWidget(label, row, 0)
+            layout.addWidget(browse_button, row, 1)
+            layout.addWidget(path_line_edit, row, 2)
+
+    def browse_file(self, line_edit, signal):
+        file_dialog = QtWidgets.QFileDialog(self)
+        file_dialog.setWindowTitle(f"{signal} Path")
+        file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
+        file_dialog.setNameFilter("Audio Files (*.wav *.mp3)") 
+        
+        if file_dialog.exec_():
+            selected_files = file_dialog.selectedFiles()
+            if selected_files:
+                line_edit.setText(selected_files[0])
+
+    def hide_signal_widgets(self, layout: QtWidgets.QGridLayout):
+        while layout.count():
+            item = layout.takeAt(0)
+            if item and item.widget():
+                item.widget().deleteLater()
+
     def add_bottom_buttons(self):
         self.bottom_buttons_layout = QtWidgets.QHBoxLayout()
-
+        
+        # Ok button
         self.ok_button = QtWidgets.QPushButton("Ok")
         self.ok_button.setFixedSize(QtCore.QSize(150, 30))
         self.ok_button.setStyleSheet("""
@@ -537,6 +616,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
         self.ok_button.setCursor(QtCore.Qt.PointingHandCursor)
         self.ok_button.clicked.connect(self.ok_button_clicked)
 
+        # Clean button
         self.clean_button = QtWidgets.QPushButton("Clean")
         self.clean_button.setFixedSize(QtCore.QSize(150, 30))
         self.clean_button.setStyleSheet("""
@@ -555,6 +635,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
         self.clean_button.setCursor(QtCore.Qt.PointingHandCursor)
         self.clean_button.clicked.connect(self.clean_button_clicked)
 
+        # Cancel button
         self.cancel_button = QtWidgets.QPushButton("Cancel")
         self.cancel_button.setFixedSize(QtCore.QSize(150, 30))
         self.cancel_button.setStyleSheet("""
@@ -576,220 +657,201 @@ class LoadSignalsWindow(QtWidgets.QWidget):
         self.bottom_buttons_layout.addWidget(self.ok_button)
         self.bottom_buttons_layout.addWidget(self.clean_button)
         self.bottom_buttons_layout.addWidget(self.cancel_button)
-
-        self.main_layout.addLayout(self.bottom_buttons_layout)
-
-    def a_format_paths(self):
-        self.a_format_channel_layout = QtWidgets.QHBoxLayout()
-        self.a_format_channel = QtWidgets.QButtonGroup(self)
-        self.a_format_4_channel_radio = QtWidgets.QRadioButton("4 Channel")
-        self.a_format_1_channel_radio = QtWidgets.QRadioButton("1 Channel")
-        self.a_format_channel.addButton(self.a_format_4_channel_radio)
-        self.a_format_channel.addButton(self.a_format_1_channel_radio)
-        self.a_format_channel_layout.addWidget(self.a_format_4_channel_radio)
-        self.a_format_channel_layout.addWidget(self.a_format_1_channel_radio)
-        self.a_format_layout.addLayout(self.a_format_channel_layout)
-        self.a_format_4_channel_radio.toggled.connect(self.update_a_format_widgets)
-        self.a_format_1_channel_radio.toggled.connect(self.update_a_format_widgets)
-        self.a_format_signal_layout = QtWidgets.QVBoxLayout()
-        self.a_format_layout.addLayout(self.a_format_signal_layout)
-        self.hide_signal_widgets(self.a_format_signal_layout)
-
-    def b_format_paths(self):
-        self.b_format_channel = QtWidgets.QButtonGroup(self)
-        self.b_format_4_channel_radio = QtWidgets.QRadioButton("4 Channel")
-        self.b_format_1_channel_radio = QtWidgets.QRadioButton("1 Channel")
-        self.b_format_channel.addButton(self.b_format_4_channel_radio)
-        self.b_format_channel.addButton(self.b_format_1_channel_radio)
-        self.b_format_channel_layout = QtWidgets.QHBoxLayout()
-        self.b_format_channel_layout.addWidget(self.b_format_4_channel_radio)
-        self.b_format_channel_layout.addWidget(self.b_format_1_channel_radio)
-        self.b_format_layout.addLayout(self.b_format_channel_layout)
-        self.b_format_4_channel_radio.toggled.connect(self.update_b_format_widgets)
-        self.b_format_1_channel_radio.toggled.connect(self.update_b_format_widgets)
-        self.b_format_signal_layout = QtWidgets.QVBoxLayout()
-        self.b_format_layout.addLayout(self.b_format_signal_layout)
-        self.hide_signal_widgets(self.b_format_signal_layout)
-
-    def lss_with_if_paths(self):
-        self.lss_with_if_grid_layout = QtWidgets.QGridLayout()
-        self.lss_with_if_layout.addLayout(self.lss_with_if_grid_layout)
-        self.grid_lss_if(self.lss_with_if_grid_layout, ["FLU", "FRD", "BRU", "BLD", "IF"])
-
-    def grid_lss_if(self, layout, signals):
-        for row, signal_name in enumerate(signals):
-            label = QtWidgets.QLabel(f"{signal_name}:")
-            browse_button = QtWidgets.QPushButton("")
-            browse_button.setIcon(QtGui.QIcon("docs/icons/open_folder.png"))
-            browse_button.setCursor(QtCore.Qt.PointingHandCursor)
-            path_line_edit = QtWidgets.QLineEdit()
-            path_line_edit.setReadOnly(True)
-
-            browse_button.clicked.connect(lambda state, le=path_line_edit: self.browse_file(le))
-
-            layout.addWidget(label, row, 0)
-            layout.addWidget(browse_button, row, 1)
-            layout.addWidget(path_line_edit, row, 2)
-
-    def create_signal_widgets(self, layout, signals):
-        for signal_name in signals:
-            label = QtWidgets.QLabel(f"{signal_name}:")
-            browse_button = QtWidgets.QPushButton("")
-            browse_button.setIcon(QtGui.QIcon("docs/icons/open_folder.png"))
-            browse_button.setCursor(QtCore.Qt.PointingHandCursor)
-            path_line_edit = QtWidgets.QLineEdit()
-            path_line_edit.setReadOnly(True)
-
-            browse_button.clicked.connect(lambda state, le=path_line_edit: self.browse_file(le))
-
-            signal_layout = QtWidgets.QHBoxLayout()
-            signal_layout.addWidget(label)
-            signal_layout.addWidget(browse_button)
-            signal_layout.addWidget(path_line_edit)
-
-            layout.addLayout(signal_layout)
-
-    def browse_file(self, line_edit):
-        file_dialog = QtWidgets.QFileDialog(self)
-        file_dialog.setNameFilter("Audio Files (*.wav *.mp3)")
-        file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
-        if file_dialog.exec_():
-            selected_files = file_dialog.selectedFiles()
-            if selected_files:
-                line_edit.setText(selected_files[0])
-
-    def update_a_format_widgets(self):
-        self.update_signal_widgets(self.a_format_signal_layout, self.a_format_4_channel_radio.isChecked())
-
-    def update_b_format_widgets(self):
-        self.update_signal_widgets(self.b_format_signal_layout, self.b_format_4_channel_radio.isChecked())
-
-    def update_signal_widgets(self, layout, is_4_channel):
-        self.hide_signal_widgets(layout)
-        if is_4_channel:
-            self.create_signal_widgets(layout, ["FLU", "FRD", "BRU", "BLD"])
-        else:
-            self.create_signal_widgets(layout, ["Signal"])
-
-    def hide_signal_widgets(self, layout):
-        while layout.count():
-            item = layout.takeAt(0)
-            if item and item.layout():
-                while item.layout().count():
-                    widget_item = item.layout().takeAt(0)
-                    if widget_item:
-                        widget_item.widget().deleteLater()
+        self.mainLayout.addLayout(self.bottom_buttons_layout)
 
     def ok_button_clicked(self):
         signal_parameters = self.collect_signal_parameters()
         self.signals_collected.emit(signal_parameters)
         self.close()
 
-    def clean_button_clicked(self):
-        self.clear_all_signal_paths()
-
     def cancel_button_clicked(self):
         self.close()
 
+    def clean_button_clicked(self):
+        self.clear_all_signal_paths()
+
     def clear_all_signal_paths(self):
-        for layout in [self.a_format_signal_layout, self.b_format_signal_layout, self.lss_with_if_layout]:
-            self.clear_signal_paths(layout)
+        self.clear_signal_paths(self.a_format_signal_layout)
+        self.clear_signal_paths(self.b_format_signal_layout)
+        self.clear_signal_paths(self.lss_with_if_grid_layout)
 
     def clear_signal_paths(self, layout):
-        for i in reversed(range(layout.count())):
-            item = layout.itemAt(i)
-            if item and item.layout():
-                path_line_edit = item.layout().itemAt(2).widget()
-                if isinstance(path_line_edit, QtWidgets.QLineEdit):
-                    path_line_edit.clear()
-
-    def get_selected_signal_type(self):
-        if self.a_format_4_channel_radio.isChecked():
-            return "a-format-4-channel"
-        elif self.a_format_1_channel_radio.isChecked():
-            return "a-format-1-channel"
-        elif self.b_format_4_channel_radio.isChecked():
-            return "b-format-4-channel"
-        elif self.b_format_1_channel_radio.isChecked():
-            return "b-format-1-channel"
-        else:
-            return "lss-format"
+        if layout is None:
+            return
+        for row in range(layout.rowCount()):
+            item = layout.itemAtPosition(row, 2)
+            if item and isinstance(item.widget(), QtWidgets.QLineEdit):
+                item.widget().clear()
 
     def collect_signal_parameters(self):
-        signal_type = self.get_selected_signal_type()
-        signal_parameters = {}
+        signals_path = {}
 
-        if signal_type == "a-format-4-channel":
-            signal_parameters = {
-                "Format": "A-Format",
-                "Channels": 4,
-                "FLU Path": self.a_format_signal_layout.itemAt(0).layout().itemAt(2).widget().text(),
-                "FRD Path": self.a_format_signal_layout.itemAt(1).layout().itemAt(2).widget().text(),
-                "BRU Path": self.a_format_signal_layout.itemAt(2).layout().itemAt(2).widget().text(),
-                "BLD Path": self.a_format_signal_layout.itemAt(3).layout().itemAt(2).widget().text(),
+        current_index = self.tabWidget.currentIndex()
+        current_widget = self.tabWidget.widget(current_index)
+
+        if current_widget == self.a_format_tab:
+            if self.a_format_4_channel_radio.isChecked():
+                signals_path = {
+                    "front_left_up": self.a_format_signal_layout.itemAtPosition(0, 2).widget().text(),
+                    "front_right_down": self.a_format_signal_layout.itemAtPosition(1, 2).widget().text(),
+                    "back_right_up": self.a_format_signal_layout.itemAtPosition(2, 2).widget().text(),
+                    "back_left_down": self.a_format_signal_layout.itemAtPosition(3, 2).widget().text(),
+                }
+            
+                if not self.check_paths(signals_path):
+                    return {}
+
+                signals_path = {
+                    "input_mode": InputFormat.AFORMAT,
+                    "channels_per_file": 1,
+                    **signals_path,
+                    "frequency_correction": True,
+                }
+
+            elif self.a_format_1_channel_radio.isChecked():
+                signals_path = {
+                    "stacked_signals": self.a_format_signal_layout.itemAtPosition(0, 2).widget().text(),
+                }
+
+                if not self.check_paths(signals_path):
+                    return {}
+                
+                signals_path = {
+                    "input_mode": InputFormat.AFORMAT,
+                    "channels_per_file": 4,
+                    **signals_path,
+                    "frequency_correction": True,
+                }
+
+        elif current_widget == self.b_format_tab:
+            if self.b_format_4_channel_radio.isChecked():
+                signals_path = {
+                    "front_left_up": self.b_format_signal_layout.itemAtPosition(0, 2).widget().text(),
+                    "front_right_down": self.b_format_signal_layout.itemAtPosition(1, 2).widget().text(),
+                    "back_right_up": self.b_format_signal_layout.itemAtPosition(2, 2).widget().text(),
+                    "back_left_down": self.b_format_signal_layout.itemAtPosition(3, 2).widget().text(),
+                }
+
+                if not self.check_paths(signals_path):
+                    return {}
+                
+                signals_path = {
+                    "input_mode": InputFormat.BFORMAT,
+                    "channels_per_file": 1,
+                    **signals_path,
+                    "frequency_correction": True,
+                }
+
+            elif self.b_format_1_channel_radio.isChecked():
+                signals_path = {
+                    "stacked_signals": self.b_format_signal_layout.itemAtPosition(0, 2).widget().text(),
+                }
+
+                if not self.check_paths(signals_path):
+                    return {}
+                
+                signals_path = {
+                    "input_mode": InputFormat.BFORMAT,
+                    "channels_per_file": 4,
+                    **signals_path,
+                    "frequency_correction": True,
+                }
+
+        elif current_widget == self.lss_with_if_tab:
+            signals_path = {
+                "front_left_up": self.lss_with_if_grid_layout.itemAtPosition(0, 2).widget().text(),
+                "front_right_down": self.lss_with_if_grid_layout.itemAtPosition(1, 2).widget().text(),
+                "back_right_up": self.lss_with_if_grid_layout.itemAtPosition(2, 2).widget().text(),
+                "back_left_down": self.lss_with_if_grid_layout.itemAtPosition(3, 2).widget().text(),
+                "inverse_filter": self.lss_with_if_grid_layout.itemAtPosition(4, 2).widget().text(),
             }
-        elif signal_type == "a-format-1-channel":
-            signal_parameters = {
-                "Format": "A-Format",
-                "Channels": 1,
-                "Signal Path": self.a_format_signal_layout.itemAt(0).layout().itemAt(2).widget().text(),
-            }
-        elif signal_type == "b-format-4-channel":
-            signal_parameters = {
-                "Format": "B-Format",
-                "Channels": 4,
-                "FLU Path": self.b_format_signal_layout.itemAt(0).layout().itemAt(2).widget().text(),
-                "FRD Path": self.b_format_signal_layout.itemAt(1).layout().itemAt(2).widget().text(),
-                "BRU Path": self.b_format_signal_layout.itemAt(2).layout().itemAt(2).widget().text(),
-                "BLD Path": self.b_format_signal_layout.itemAt(3).layout().itemAt(2).widget().text(),
-            }
-        elif signal_type == "b-format-1-channel":
-            signal_parameters = {
-                "Format": "B-Format",
-                "Channels": 1,
-                "Signal Path": self.b_format_signal_layout.itemAt(0).layout().itemAt(2).widget().text(),
-            }
-        elif signal_type == "lss-format":
-            signal_parameters = {
-                "Format": "LSS with IF",
-                "FLU Path": self.lss_with_if_grid_layout.itemAtPosition(0, 2).widget().text(),
-                "FRD Path": self.lss_with_if_grid_layout.itemAtPosition(1, 2).widget().text(),
-                "BRU Path": self.lss_with_if_grid_layout.itemAtPosition(2, 2).widget().text(),
-                "BLD Path": self.lss_with_if_grid_layout.itemAtPosition(3, 2).widget().text(),
-                "IF Path": self.lss_with_if_grid_layout.itemAtPosition(4, 2).widget().text(),
+
+            if not self.check_paths(signals_path):
+                return {}
+            
+            signals_path = {
+                "input_mode": InputFormat.LSS,
+                "channels_per_file": 1,
+                **signals_path,
+                "frequency_correction": True,
             }
 
-        return signal_parameters
+        return signals_path
+    
+    def check_paths(self, signal_dict):
+        invalid_paths = []
 
-    def update_signal_paths(self, signal_parameters):
-        if signal_parameters:
-            format_type = signal_parameters.get("Format")
-            channels = signal_parameters.get("Channels", 1)
+        for key, path in signal_dict.items():
+            if not path or not Path(path).exists():
+                invalid_paths.append(key)
 
-            if format_type == "A-Format":
-                if channels == 4:
-                    self.a_format_signal_layout.itemAt(0).layout().itemAt(2).widget().setText(signal_parameters.get("FLU Path", ""))
-                    self.a_format_signal_layout.itemAt(1).layout().itemAt(2).widget().setText(signal_parameters.get("FRD Path", ""))
-                    self.a_format_signal_layout.itemAt(2).layout().itemAt(2).widget().setText(signal_parameters.get("BRU Path", ""))
-                    self.a_format_signal_layout.itemAt(3).layout().itemAt(2).widget().setText(signal_parameters.get("BLD Path", ""))
-                else:
-                    self.a_format_signal_layout.itemAt(0).layout().itemAt(2).widget().setText(signal_parameters.get("Signal Path", ""))
+        if invalid_paths:
+            message = "Warning: The following paths are invalid or empty:\n"
+            message += "\n".join(invalid_paths)
+            
+            msg_box = QtWidgets.QMessageBox()
+            msg_box.setWindowTitle("Invalid Paths")
+            msg_box.setText(message)
+            msg_box.setIcon(QtWidgets.QMessageBox.Warning)
 
-            elif format_type == "B-Format":
-                if channels == 4:
-                    self.b_format_signal_layout.itemAt(0).layout().itemAt(2).widget().setText(signal_parameters.get("FLU Path", ""))
-                    self.b_format_signal_layout.itemAt(1).layout().itemAt(2).widget().setText(signal_parameters.get("FRD Path", ""))
-                    self.b_format_signal_layout.itemAt(2).layout().itemAt(2).widget().setText(signal_parameters.get("BRU Path", ""))
-                    self.b_format_signal_layout.itemAt(3).layout().itemAt(2).widget().setText(signal_parameters.get("BLD Path", ""))
-                else:
-                    self.b_format_signal_layout.itemAt(0).layout().itemAt(2).widget().setText(signal_parameters.get("Signal Path", ""))
+            msg_box.setStyleSheet("""
+                QMessageBox {
+                    background-color: #2f2c33;
+                    color: white;
+                    border: 2px solid #a0a0a0;
+                }
+                QMessageBox QLabel {
+                    color: white;
+                }
+                QMessageBox QPushButton {
+                    background-color: white;
+                    color: black;
+                    border: 2px solid #1f1b24;
+                    padding: 5px;
+                    border-radius: 5px;
+                    icon-size: 0px;
+                }
+                QMessageBox QPushButton:hover {
+                    background-color: rgba(255, 99, 71, 0.6);
+                    border: 2px solid rgba(255, 99, 71, 1);
+                }
+            """)
+            
+            msg_box.exec_()
+            
+            return False
 
-            elif format_type == "LSS with IF":
-                self.lss_with_if_grid_layout.itemAtPosition(0, 2).widget().setText(signal_parameters.get("FLU Path", ""))
-                self.lss_with_if_grid_layout.itemAtPosition(1, 2).widget().setText(signal_parameters.get("FRD Path", ""))
-                self.lss_with_if_grid_layout.itemAtPosition(2, 2).widget().setText(signal_parameters.get("BRU Path", ""))
-                self.lss_with_if_grid_layout.itemAtPosition(3, 2).widget().setText(signal_parameters.get("BLD Path", ""))
-                self.lss_with_if_grid_layout.itemAtPosition(4, 2).widget().setText(signal_parameters.get("IF Path", ""))
+        return True
+    
+    # def update_signal_paths(self, signal_parameters):
+    #     if signal_parameters:
+    #         format_type = signal_parameters.get("Format")
+    #         channels = signal_parameters.get("Channels", 1)
+
+    #         if format_type == "A-Format":
+    #             if channels == 4:
+    #                 self.a_format_signal_layout.itemAt(0).layout().itemAt(2).widget().setText(signal_parameters.get("FLU Path", ""))
+    #                 self.a_format_signal_layout.itemAt(1).layout().itemAt(2).widget().setText(signal_parameters.get("FRD Path", ""))
+    #                 self.a_format_signal_layout.itemAt(2).layout().itemAt(2).widget().setText(signal_parameters.get("BRU Path", ""))
+    #                 self.a_format_signal_layout.itemAt(3).layout().itemAt(2).widget().setText(signal_parameters.get("BLD Path", ""))
+    #             else:
+    #                 self.a_format_signal_layout.itemAt(0).layout().itemAt(2).widget().setText(signal_parameters.get("Signal Path", ""))
+
+    #         elif format_type == "B-Format":
+    #             if channels == 4:
+    #                 self.b_format_signal_layout.itemAt(0).layout().itemAt(2).widget().setText(signal_parameters.get("FLU Path", ""))
+    #                 self.b_format_signal_layout.itemAt(1).layout().itemAt(2).widget().setText(signal_parameters.get("FRD Path", ""))
+    #                 self.b_format_signal_layout.itemAt(2).layout().itemAt(2).widget().setText(signal_parameters.get("BRU Path", ""))
+    #                 self.b_format_signal_layout.itemAt(3).layout().itemAt(2).widget().setText(signal_parameters.get("BLD Path", ""))
+    #             else:
+    #                 self.b_format_signal_layout.itemAt(0).layout().itemAt(2).widget().setText(signal_parameters.get("Signal Path", ""))
+
+    #         elif format_type == "LSS with IF":
+    #             self.lss_with_if_grid_layout.itemAtPosition(0, 2).widget().setText(signal_parameters.get("FLU Path", ""))
+    #             self.lss_with_if_grid_layout.itemAtPosition(1, 2).widget().setText(signal_parameters.get("FRD Path", ""))
+    #             self.lss_with_if_grid_layout.itemAtPosition(2, 2).widget().setText(signal_parameters.get("BRU Path", ""))
+    #             self.lss_with_if_grid_layout.itemAtPosition(3, 2).widget().setText(signal_parameters.get("BLD Path", ""))
+    #             self.lss_with_if_grid_layout.itemAtPosition(4, 2).widget().setText(signal_parameters.get("IF Path", ""))
 
 
 if __name__ == "__main__":
