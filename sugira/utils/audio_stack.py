@@ -9,6 +9,9 @@ def read_signals(input_data_dict: dict) -> dict:
     """
     
     """
+
+    sample_rate = 48000
+
     for key_i, path_i in input_data_dict.items():
         try:
             signal, sample_rate = sf.read(path_i)
