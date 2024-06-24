@@ -2,13 +2,20 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5 import QtWebEngineWidgets
 import sys
 from pathlib import Path
-import threading
+from utils.embed_files import read_from_json, generate_html
+from engine.plot_plan_view import put_background_image
 from typing import List
 from engine.input import InputFormat
 from core import SeaUrchinAnalyzer
 
 
 class MainWindowUI(object):
+    """
+    Class associated with the main window with their respective style and associated methods.
+    """
+
+    signals_in_memory = False
+
     def main_window_config(self, MainWindow: QtWidgets.QMainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setFixedSize(QtCore.QSize(1700, 900))
@@ -37,7 +44,7 @@ class MainWindowUI(object):
 
         self.tabWidget = QtWidgets.QTabWidget(self.main_frame)
         self.tabWidget.setObjectName("tabWidget")
-        self.tabWidget.setFixedSize(1640, 880)
+        self.tabWidget.setFixedSize(1640, 870)
         self.tabWidget.setStyleSheet(
             """
                 QTabWidget::pane {
@@ -68,7 +75,7 @@ class MainWindowUI(object):
         self.horizontalLayout.setObjectName("horizontalLayout")
 
         self.frame_inputs = QtWidgets.QFrame(self.tab_main_window)
-        self.frame_inputs.setFixedSize(350, 750)
+        self.frame_inputs.setFixedSize(350, 775)
         self.frame_inputs.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame_inputs.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_inputs.setObjectName("frame_inputs")
@@ -82,7 +89,8 @@ class MainWindowUI(object):
         self.frame_sugira_logo = QtWidgets.QFrame(self.frame_inputs)
         self.frame_sugira_logo.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame_sugira_logo.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_sugira_logo.setFixedSize(350, 250)
+        self.frame_sugira_logo.setFixedSize(350, 275)
+        self.frame_sugira_logo.setContentsMargins(0, 0, 0, 5)
         self.frame_sugira_logo.setObjectName("frame_sugira_logo")
 
         self.logo_layout = QtWidgets.QVBoxLayout(self.frame_sugira_logo)
@@ -93,11 +101,10 @@ class MainWindowUI(object):
         self.label_logo_main = QtWidgets.QLabel(self.frame_sugira_logo)
         self.label_logo_main.setText("SUGIRA Logo")
         self.label_logo_main.setPixmap(
-            QtGui.QPixmap(str(Path("docs/images/sugira_logo.png")))
+            QtGui.QPixmap(str(Path("docs/images/1SIGURA_FINAL.png")))
         )
         self.label_logo_main.setScaledContents(True)
         self.label_logo_main.setObjectName("label_logo_main")
-        self.label_logo_main.setMaximumSize(QtCore.QSize(300, 160))
 
         self.logo_layout.addWidget(
             self.label_logo_main, alignment=QtCore.Qt.AlignCenter
@@ -122,7 +129,6 @@ class MainWindowUI(object):
 
         # Basic configurations
         font_labels = QtGui.QFont()
-        # font_labels.setFamily("Calibri")
         font_labels.setPointSize(13)
 
         vertical_space = QtWidgets.QSpacerItem(
@@ -131,6 +137,34 @@ class MainWindowUI(object):
         vertical_space2 = QtWidgets.QSpacerItem(
             20, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed
         )
+
+        push_buttons_grey_style = """
+            QPushButton{
+                border: 2px solid rgb(140, 140, 140);
+                border-radius: 10px;
+                background: rgb(180, 180, 180);
+                color: black;
+                font-size: 12pt;
+            }
+            QPushButton:hover{
+                border: rgb(96, 133, 213);
+                background: rgb(140, 140, 140);
+            }
+        """
+
+        push_buttons_red_style = """
+            QPushButton{
+                border: 2px solid rgba(255, 99, 71, 1);
+                border-radius: 10px;
+                background: rgba(255, 99, 71, 0.6);
+                color: black;
+                font-size: 12pt;
+            }
+            QPushButton:hover{
+                border: rgb(96, 133, 213);
+                background: rgba(255, 99, 71, 1);
+            }
+        """
 
         # Integration Window
         self.label_integration_window = QtWidgets.QLabel(self.frame_analyze)
@@ -142,7 +176,9 @@ class MainWindowUI(object):
         self.integration_options = QtWidgets.QComboBox(self.frame_analyze)
         integration_options = {
             "1 ms": 1 * 10 ** (-3),
+            "3 ms": 3 * 10 ** (-3),
             "5 ms": 5 * 10 ** (-3),
+            "7 ms": 7 * 10 ** (-3),
             "10 ms": 10 * 10 ** (-3),
         }
         for int_window_time in integration_options:
@@ -175,7 +211,7 @@ class MainWindowUI(object):
         self.label_analysis_length.setStyleSheet("color: rgb(224, 224, 224);")
         self.verticalLayout_6.addWidget(self.label_analysis_length)
         self.analysis_length = QtWidgets.QLineEdit(self.frame_analyze)
-        self.analysis_length.setText("300")
+        self.analysis_length.setText("500")
         self.analysis_length.setObjectName("analysis_length")
         self.analysis_length.setStyleSheet(
             """
@@ -212,10 +248,11 @@ class MainWindowUI(object):
         self.verticalLayout_6.addWidget(self.threshold)
         self.verticalLayout_6.addItem(vertical_space)
 
-        # Frequency Correction
+        # Frequency Correction - Low Pass Filter
         self.radio_freq_correction = QtWidgets.QRadioButton(self.frame_analyze)
-        self.radio_freq_correction.setText("Frequency Correction")
+        self.radio_freq_correction.setText("Low Pass Filter")
         self.radio_freq_correction.setChecked(True)
+        self.radio_freq_correction.setFont(font_labels)
         self.radio_freq_correction.setStyleSheet(
             """
             QRadioButton {
@@ -247,21 +284,7 @@ class MainWindowUI(object):
         self.pb_process = QtWidgets.QPushButton(self.frame_push_buttons)
         self.pb_process.setText("Process")
         self.pb_process.setMinimumSize(QtCore.QSize(100, 40))
-        self.pb_process.setStyleSheet(
-            """
-            QPushButton{
-                border: 2px solid rgba(255, 99, 71, 1);
-                border-radius: 10px;
-                background: rgba(255, 99, 71, 0.6);
-                color: black;
-                font-size: 12pt;
-            }
-            QPushButton:hover{
-                border: rgb(96, 133, 213);
-                background: rgba(255, 99, 71, 1);
-            }
-        """
-        )
+        self.pb_process.setStyleSheet(push_buttons_red_style)
         self.pb_process.setObjectName("process_pb")
         self.pb_process.setCursor(QtCore.Qt.PointingHandCursor)
         self.pb_process.clicked.connect(self.process_data)
@@ -270,21 +293,7 @@ class MainWindowUI(object):
         self.pb_load_signals = QtWidgets.QPushButton(self.frame_push_buttons)
         self.pb_load_signals.setText("Load Signals")
         self.pb_load_signals.setMinimumSize(QtCore.QSize(100, 40))
-        self.pb_load_signals.setStyleSheet(
-            """
-            QPushButton{
-                border: 2px solid rgb(140, 140, 140);
-                border-radius: 10px;
-                background: rgb(180, 180, 180);
-                color: black;
-                font-size: 12pt;
-            }
-            QPushButton:hover{
-                border: rgb(96, 133, 213);
-                background: rgb(140, 140, 140);
-            }
-        """
-        )
+        self.pb_load_signals.setStyleSheet(push_buttons_grey_style)
 
         self.pb_load_signals.setObjectName("load_signals_pb")
         self.pb_load_signals.setCursor(QtCore.Qt.PointingHandCursor)
@@ -303,21 +312,7 @@ class MainWindowUI(object):
         self.pb_export = QtWidgets.QPushButton(self.frame_push_buttons)
         self.pb_export.setText("Export")
         self.pb_export.setMinimumSize(QtCore.QSize(100, 40))
-        self.pb_export.setStyleSheet(
-            """
-            QPushButton{
-                border: 2px solid rgb(140, 140, 140);
-                border-radius: 10px;
-                background: rgb(180, 180, 180);
-                color: black;
-                font-size: 12pt;
-            }
-            QPushButton:hover{
-                border: rgb(96, 133, 213);
-                background: rgb(140, 140, 140);
-            }
-        """
-        )
+        self.pb_export.setStyleSheet(push_buttons_grey_style)
         self.pb_export.setObjectName("export_pb")
         self.pb_export.setCursor(QtCore.Qt.PointingHandCursor)
         self.pb_export.clicked.connect(self.export_data)
@@ -326,21 +321,7 @@ class MainWindowUI(object):
         self.pb_clean = QtWidgets.QPushButton(self.frame_push_buttons)
         self.pb_clean.setText("Clean")
         self.pb_clean.setMinimumSize(QtCore.QSize(100, 40))
-        self.pb_clean.setStyleSheet(
-            """
-            QPushButton{
-                border: 2px solid rgb(140, 140, 140);
-                border-radius: 10px;
-                background: rgb(180, 180, 180);
-                color: black;
-                font-size: 12pt;
-            }
-            QPushButton:hover{
-                border: rgb(96, 133, 213);
-                background: rgb(140, 140, 140);
-            }
-        """
-        )
+        self.pb_clean.setStyleSheet(push_buttons_grey_style)
 
         self.pb_clean.setObjectName("clean_pb")
         self.pb_clean.setCursor(QtCore.Qt.PointingHandCursor)
@@ -385,7 +366,7 @@ class MainWindowUI(object):
         self.horizontalLayout_plan.setObjectName("horizontalLayout_plan")
 
         self.frame_inputs_plan = QtWidgets.QFrame(self.plan_section)
-        self.frame_inputs_plan.setFixedSize(350, 700)
+        self.frame_inputs_plan.setFixedSize(350, 750)
         self.frame_inputs_plan.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame_inputs_plan.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_inputs_plan.setObjectName("frame_inputs_plan")
@@ -399,26 +380,27 @@ class MainWindowUI(object):
         )
         self.sugiraLogoVerticalLayout_plan.setContentsMargins(0, 0, 0, 0)
         self.sugiraLogoVerticalLayout_plan.setSpacing(0)
+        self.sugiraLogoVerticalLayout_plan.setAlignment(QtCore.Qt.AlignCenter)
 
         self.frame_sugira_logo_plan = QtWidgets.QFrame(self.frame_inputs_plan)
         self.frame_sugira_logo_plan.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame_sugira_logo_plan.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_sugira_logo_plan.setFixedSize(350, 300)
+        self.frame_sugira_logo_plan.setFixedSize(350, 270)
         self.frame_sugira_logo_plan.setObjectName("frame_sugira_logo_plan")
 
         self.logo_layout_plan = QtWidgets.QVBoxLayout(self.frame_sugira_logo_plan)
         self.logo_layout_plan.setContentsMargins(0, 0, 0, 0)
         self.logo_layout_plan.setSpacing(0)
         self.logo_layout_plan.setAlignment(QtCore.Qt.AlignCenter)
+        self.logo_layout_plan.setAlignment(QtCore.Qt.AlignCenter)
 
         self.label_logo_plan = QtWidgets.QLabel(self.frame_sugira_logo_plan)
         self.label_logo_plan.setText("SUGIRA Logo")
         self.label_logo_plan.setPixmap(
-            QtGui.QPixmap(str(Path("docs/images/sugira_logo.png")))
+            QtGui.QPixmap(str(Path("docs/images/sugira_full_logo.png")))
         )
         self.label_logo_plan.setScaledContents(True)
         self.label_logo_plan.setObjectName("label_logo_plan")
-        self.label_logo_plan.setMaximumSize(QtCore.QSize(300, 160))
 
         self.logo_layout_plan.addWidget(
             self.label_logo_plan, alignment=QtCore.Qt.AlignCenter
@@ -433,47 +415,20 @@ class MainWindowUI(object):
         # Load Plan
         self.pb_load_plan = QtWidgets.QPushButton(self.frame_push_buttons_plan)
         self.pb_load_plan.setText("Load Plan")
-        self.pb_load_plan.setMinimumSize(QtCore.QSize(100, 40))
-        self.pb_load_plan.setStyleSheet(
-            """
-            QPushButton{
-                border: 2px solid rgba(255, 99, 71, 1);
-                border-radius: 10px;
-                background: rgba(255, 99, 71, 0.6);
-                color: black;
-                font-size: 12pt;
-            }
-            QPushButton:hover{
-                border: rgb(96, 133, 213);
-                background: rgba(255, 99, 71, 1);
-            }
-        """
-        )
+        self.pb_load_plan.setFixedSize(QtCore.QSize(150, 40))
+        self.pb_load_plan.setStyleSheet(push_buttons_red_style)
         self.pb_load_plan.setObjectName("load_plan_pb")
         self.pb_load_plan.setCursor(QtCore.Qt.PointingHandCursor)
+        self.pb_load_plan.clicked.connect(self.load_plan)
 
         # Export
         self.pb_export = QtWidgets.QPushButton(self.frame_push_buttons_plan)
-        self.pb_export.setText("Export")
-        self.pb_export.setMinimumSize(QtCore.QSize(100, 40))
-        self.pb_export.setStyleSheet(
-            """
-            QPushButton{
-                border: 2px solid rgb(140, 140, 140);
-                border-radius: 10px;
-                background: rgb(180, 180, 180);
-                color: black;
-                font-size: 12pt;
-            }
-            QPushButton:hover{
-                border: rgb(96, 133, 213);
-                background: rgb(140, 140, 140);
-            }
-        """
-        )
-
-        self.pb_export.setObjectName("analyze_plan_pb")
+        self.pb_export.setText("Export Plan")
+        self.pb_export.setFixedSize(QtCore.QSize(150, 40))
+        self.pb_export.setStyleSheet(push_buttons_grey_style)
+        self.pb_export.setObjectName("export_plan_pb")
         self.pb_export.setCursor(QtCore.Qt.PointingHandCursor)
+        self.pb_export.clicked.connect(self.export_plan_view)
 
         self.frame_push_buttons_plan.layout().addWidget(self.pb_load_plan)
         self.frame_push_buttons_plan.layout().addWidget(self.pb_export)
@@ -481,9 +436,10 @@ class MainWindowUI(object):
 
         self.horizontalLayout_plan.addWidget(self.frame_inputs_plan)
 
-        # PNG Display Section
+        # Plan View Plot Section
         self.frame_graphics_plan = QtWidgets.QFrame(self.plan_section)
-        self.frame_graphics_plan.setFixedSize(1250, 800)
+        self.frame_graphics_plan.setFixedSize(1250, 600)
+        self.frame_graphics_plan.setContentsMargins(10, 0, 10, 0)
         self.frame_graphics_plan.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame_graphics_plan.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_graphics_plan.setObjectName("frame_graphics_plan")
@@ -491,10 +447,15 @@ class MainWindowUI(object):
         self.graphicsLayout_plan = QtWidgets.QVBoxLayout(self.frame_graphics_plan)
         self.graphicsLayout_plan.setObjectName("graphicsLayout_plan")
 
-        self.label_image_plan = QtWidgets.QLabel(self.frame_graphics_plan)
-        self.label_image_plan.setScaledContents(True)
-        self.label_image_plan.setObjectName("label_image_plan")
-        self.graphicsLayout_plan.addWidget(self.label_image_plan)
+        self.plan_view_holder = QtWebEngineWidgets.QWebEngineView(
+            self.frame_graphics_plan
+        )
+        self.plan_view_holder.setStyleSheet("background-color: #1f1b24;")
+        background_url = QtCore.QUrl.fromLocalFile(
+            str(Path("docs/background.html").resolve())
+        )
+        self.plan_view_holder.load(background_url)
+        self.graphicsLayout_plan.addWidget(self.plan_view_holder)
 
         self.horizontalLayout_plan.addWidget(self.frame_graphics_plan)
 
@@ -502,53 +463,141 @@ class MainWindowUI(object):
 
         MainWindow.setCentralWidget(self.centralWidget)
 
-    def load_signals(self):
-        if not hasattr(self, "load_window") or not self.load_window.isVisible():
-            self.load_window = LoadSignalsWindow()
-            # self.load_window.signals_collected.connect(self.load_window.update_signal_paths)
-            self.load_window.show()
-
     def collect_main_parameters(self):
         return {
-            "Integration Window": self.integration_options.currentData(),
-            "Analysis Length": float(self.analysis_length.text()) * 10 ** (-3),
-            "Threshold": float(self.threshold.text()),
+            "integration_time": self.integration_options.currentData(),
+            "analysis_length": float(self.analysis_length.text()) * 10 ** (-3),
+            "intensity_threshold": float(self.threshold.text()),
             "frequency_correction": self.radio_freq_correction.isChecked(),
         }
 
-    def process_data(self):
-        # TO DO: CHEQUEAR QUE TODAS LAS SEÑALES DEL DICCIONARIO TIENEN UN PATH ASOCIADO.
-        signal_parameters = self.collect_main_parameters()
-        input_data = self.load_window.collect_signal_parameters()
-        analyzer = SeaUrchinAnalyzer()
-        fig = analyzer.analyze(
-            input_dict=input_data,
-            integration_time=signal_parameters["Integration Window"],
-            intensity_threshold=signal_parameters["Threshold"],
-            analysis_length=signal_parameters["Analysis Length"],
-            show=False,
-        )
-        url = QtCore.QUrl.fromLocalFile(str(Path("sugira.html").resolve()))
-        self.graphics_holder.load(url)
-        self.plotly_fig = fig
+    def load_signals(self):
+        if not hasattr(self, "load_window") or not self.load_window.isVisible():
+            self.load_window = LoadSignalsWindow()
+            self.load_window.show()
 
-    def export_data(self): ...
+    def process_data(self):
+        try:
+            self.signals_in_memory = True
+            signal_parameters = self.collect_main_parameters()
+            input_data = self.load_window.collect_signal_parameters()
+            analyzer = SeaUrchinAnalyzer()
+            fig = analyzer.analyze(
+                input_dict=input_data,
+                signal_parameters=signal_parameters,
+                show=False,
+            )
+            url = QtCore.QUrl.fromLocalFile(str(Path("sugira.html").resolve()))
+            self.graphics_holder.load(url)
+            self.plotly_fig = fig
+        except AttributeError:
+            self.signals_in_memory = False
+            msg_box = QtWidgets.QMessageBox()
+            msg_box.setIcon(QtWidgets.QMessageBox.Warning)
+            msg_box.setWindowTitle("Invalid Signals")
+            msg_box.setText("There are no signals loaded.")
+            msg_box.setStyleSheet(
+                """
+                QMessageBox {
+                    background-color: #2f2c33;
+                    color: white;
+                    border: 2px solid #a0a0a0;
+                }
+                QMessageBox QLabel {
+                    color: white;
+                }
+                QMessageBox QPushButton {
+                    background-color: white;
+                    color: black;
+                    border: 2px solid #1f1b24;
+                    padding: 5px;
+                    border-radius: 5px;
+                    icon-size: 0px;
+                }
+                QMessageBox QPushButton:hover {
+                    background-color: rgba(255, 99, 71, 0.6);
+                    border: 2px solid rgba(255, 99, 71, 1);
+                }
+            """
+            )
+            msg_box.exec_()
 
     def clean_plot(self):
         background_url = QtCore.QUrl.fromLocalFile(
             str(Path("docs/background.html").resolve())
         )
         self.graphics_holder.load(background_url)
+        self.plan_view_holder.load(background_url)
 
-    # def capture_screenshot(self):
-    #     # Wait for a short moment to ensure the page is fully rendered
-    #     QtCore.QTimer.singleShot(5000, self.save_screenshot)
+    def export_data(self): ...
 
-    # def save_screenshot(self):
-    #     image = self.graphics_holder.grab()
-    #     file_path = "screenshot.png"
-    #     image.save(file_path)
-    #     print(f"Screenshot saved to {file_path}")
+    def load_plan(self):
+        if self.signals_in_memory == False:
+            msg_box = QtWidgets.QMessageBox()
+            msg_box.setIcon(QtWidgets.QMessageBox.Warning)
+            msg_box.setWindowTitle("Invalid Signals")
+            msg_box.setText("There are no signals loaded.")
+            msg_box.setStyleSheet(
+                """
+                QMessageBox {
+                    background-color: #2f2c33;
+                    color: white;
+                    border: 2px solid #a0a0a0;
+                }
+                QMessageBox QLabel {
+                    color: white;
+                }
+                QMessageBox QPushButton {
+                    background-color: white;
+                    color: black;
+                    border: 2px solid #1f1b24;
+                    padding: 5px;
+                    border-radius: 5px;
+                    icon-size: 0px;
+                }
+                QMessageBox QPushButton:hover {
+                    background-color: rgba(255, 99, 71, 0.6);
+                    border: 2px solid rgba(255, 99, 71, 1);
+                }
+            """
+            )
+            msg_box.exec_()
+            return
+
+        options = QtWidgets.QFileDialog.Options()
+        options |= QtWidgets.QFileDialog.ReadOnly
+        file_name, _ = QtWidgets.QFileDialog.getOpenFileName(
+            None,
+            "Load Plan",
+            "",
+            "Image Files (*.png *.jpg *.jpeg);;All Files (*)",
+            options=options,
+        )
+
+        if file_name:
+            self.process_plan(file_name)
+
+    def process_plan(self, plan_image: str):
+        fig = read_from_json()
+        put_background_image(fig, plan_image)
+        generate_html(fig, "sugira_plan_view.html")
+        url = QtCore.QUrl.fromLocalFile(str(Path("sugira_plan_view.html").resolve()))
+        self.plan_view_holder.load(url)
+
+    def export_plan_view(self):
+        image = QtGui.QImage(self.plan_view_holder.grab().toImage())
+        options = QtWidgets.QFileDialog.Options()
+        default_dir = str(Path(__file__).parent.absolute().parent)
+        default_file = "plan_view_sugira.png"
+        file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            None,
+            "Save Image",
+            default_dir + "/" + default_file,
+            "Images (*.png *.jpg *.jpeg);;All Files (*)",
+            options=options,
+        )
+        if file_path:
+            image.save(file_path)
 
 
 class LoadSignalsWindow(QtWidgets.QWidget):
@@ -749,7 +798,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
             layout.addWidget(browse_button, row, 1)
             layout.addWidget(path_line_edit, row, 2)
 
-    def browse_file(self, line_edit, signal):
+    def browse_file(self, line_edit: QtWidgets.QLineEdit, signal: str):
         file_dialog = QtWidgets.QFileDialog(self)
         file_dialog.setWindowTitle(f"{signal} Path")
         file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
@@ -853,7 +902,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
         self.clear_signal_paths(self.b_format_signal_layout)
         self.clear_signal_paths(self.lss_with_if_grid_layout)
 
-    def clear_signal_paths(self, layout):
+    def clear_signal_paths(self, layout: QtWidgets.QGridLayout):
         if layout is None:
             return
         for row in range(layout.rowCount()):
@@ -981,7 +1030,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
 
         return signals_path
 
-    def check_paths(self, signal_dict):
+    def check_paths(self, signal_dict: dict):
         invalid_paths = []
 
         for key, path in signal_dict.items():
@@ -1027,36 +1076,6 @@ class LoadSignalsWindow(QtWidgets.QWidget):
             return False
 
         return True
-
-    # def update_signal_paths(self, signal_parameters):
-    #     if signal_parameters:
-    #         format_type = signal_parameters.get("Format")
-    #         channels = signal_parameters.get("Channels", 1)
-
-    #         if format_type == "A-Format":
-    #             if channels == 4:
-    #                 self.a_format_signal_layout.itemAt(0).layout().itemAt(2).widget().setText(signal_parameters.get("FLU Path", ""))
-    #                 self.a_format_signal_layout.itemAt(1).layout().itemAt(2).widget().setText(signal_parameters.get("FRD Path", ""))
-    #                 self.a_format_signal_layout.itemAt(2).layout().itemAt(2).widget().setText(signal_parameters.get("BRU Path", ""))
-    #                 self.a_format_signal_layout.itemAt(3).layout().itemAt(2).widget().setText(signal_parameters.get("BLD Path", ""))
-    #             else:
-    #                 self.a_format_signal_layout.itemAt(0).layout().itemAt(2).widget().setText(signal_parameters.get("Signal Path", ""))
-
-    #         elif format_type == "B-Format":
-    #             if channels == 4:
-    #                 self.b_format_signal_layout.itemAt(0).layout().itemAt(2).widget().setText(signal_parameters.get("FLU Path", ""))
-    #                 self.b_format_signal_layout.itemAt(1).layout().itemAt(2).widget().setText(signal_parameters.get("FRD Path", ""))
-    #                 self.b_format_signal_layout.itemAt(2).layout().itemAt(2).widget().setText(signal_parameters.get("BRU Path", ""))
-    #                 self.b_format_signal_layout.itemAt(3).layout().itemAt(2).widget().setText(signal_parameters.get("BLD Path", ""))
-    #             else:
-    #                 self.b_format_signal_layout.itemAt(0).layout().itemAt(2).widget().setText(signal_parameters.get("Signal Path", ""))
-
-    #         elif format_type == "LSS with IF":
-    #             self.lss_with_if_grid_layout.itemAtPosition(0, 2).widget().setText(signal_parameters.get("FLU Path", ""))
-    #             self.lss_with_if_grid_layout.itemAtPosition(1, 2).widget().setText(signal_parameters.get("FRD Path", ""))
-    #             self.lss_with_if_grid_layout.itemAtPosition(2, 2).widget().setText(signal_parameters.get("BRU Path", ""))
-    #             self.lss_with_if_grid_layout.itemAtPosition(3, 2).widget().setText(signal_parameters.get("BLD Path", ""))
-    #             self.lss_with_if_grid_layout.itemAtPosition(4, 2).widget().setText(signal_parameters.get("IF Path", ""))
 
 
 if __name__ == "__main__":
