@@ -3,6 +3,8 @@ import numpy as np
 
 
 def export_data(
+    time: np.ndarray,
+    w_channel: np.ndarray,
     intensity: np.ndarray,
     azimuth: np.ndarray,
     elevation: np.ndarray,
@@ -13,6 +15,10 @@ def export_data(
 
     Parameters
     ----------
+    time: np.ndarray,
+        ...
+    w_channel: np.ndarray,
+        ...
     intensity : np.ndarray
         Intensity array.
     azimuth : np.ndarray
@@ -24,6 +30,6 @@ def export_data(
     """
 
     with open(filename, "w", encoding="utf-8") as file:
-        file.write("Azimuth,Intensity,Elevation\n")
+        file.write("Time [ms], W Channel, Azimuth,Intensity,Elevation\n")
         for _, (intens, azim, elev) in enumerate(zip(intensity, azimuth, elevation)):
-            file.write(f"{azim},{intens},{elev}\n")
+            file.write(f"{time}, {w_channel}, {azim},{intens},{elev}\n")
