@@ -43,12 +43,14 @@ def crop_2d(
     return intensity_directions_cropped
 
 
-def bformat_to_intensity(signal: np.ndarray, sample_rate) -> Tuple[np.ndarray]:
+def bformat_to_intensity(signal: np.ndarray, sample_rate: float, frequency_correction: bool) -> Tuple[np.ndarray]:
     """
     """
-    #Calculate intensity from directions. Intensity = pressure(W channel) * pressure_gradient(XYZ channel)
-    signal_filtered = low_pass_filter(signal, FILTER_CUTOFF, sample_rate)
-    #signal_filtered = signal
+    # Calculate intensity from directions. Intensity = pressure(W channel) * pressure_gradient(XYZ channel)
+    if frequency_correction == True:
+        signal_filtered = low_pass_filter(signal, FILTER_CUTOFF, sample_rate)
+    else:
+        signal_filtered = signal
     intensity_directions = (signal_filtered[0, :] * signal_filtered[1:, :])
 
     return intensity_directions
