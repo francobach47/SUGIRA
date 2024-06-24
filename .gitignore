@@ -160,3 +160,6 @@ cython_debug/
 #.idea/
 
 sugira.html
+sugira_plan_view.json
+sugira_plan_view.html
+sugira_data.txt
