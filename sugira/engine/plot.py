@@ -15,11 +15,14 @@ def hedgehog(
     reflex_to_direct: np.ndarray,
     azimuth_peaks: np.ndarray,
     elevation_peaks: np.ndarray,
+    signal_parameters: dict
 ) -> go.Figure:
-    """Create a hedgehog plot."""
+    """
+    Create a hedgehog plot.
+    """
+    
     time_peaks *= 1000  # seconds to miliseconds
     normalized_intensities = min_max_normalization(reflex_to_direct)
-    # pylint: disable=invalid-name
     x, y, z = spherical_to_cartesian(
         normalized_intensities, azimuth_peaks, elevation_peaks
     )
@@ -32,20 +35,45 @@ def hedgehog(
             z=zero_inserter(z),
             marker={
                 "color": zero_inserter(normalized_intensities),
-                "colorscale": "inferno",
+                 "colorscale": [
+                    [0.0, '#353535'],
+                    [0.1, '#595854'],
+                    [0.15, '#7d7967'],
+                    [0.2, '#9b9066'],
+                    [0.25, '#bcab67'],
+                    [0.4, '#f6ab2c'],
+                    [0.5, '#f6832c'],
+                    [0.7, '#f65d2c'],
+                    [0.9, '#dd2942'],
+                    [1.0, '#ff0800']
+                ],
                 "colorbar": {
                     "thickness": 40,
-                    "tickmode": "array",  # Specify array mode for tick values
+                    "tickmode": "array",
                     "tickvals": np.linspace(0,1,10),
-                    "ticktext": [f"{val: .1f}ms" for val in np.linspace(len(normalized_time_peaks),0,10)],
-                    "title": {"text": "<b>Time</b>"},
+                    "ticktext": [f"{val: .1f} dB" for val in np.linspace(np.min(reflex_to_direct),np.max(reflex_to_direct),10)],
+                    "title": {
+                        "text": "<b>Level</b>",
+                        "side": "top",
+                        },
                 },
                 "size": 3,
             },
             line={
                 "width": 8,
                 "color": zero_inserter(normalized_intensities),
-                "colorscale": "inferno",
+                "colorscale": [
+                    [0.0, '#353535'],
+                    [0.1, '#595854'],
+                    [0.15, '#7d7967'],
+                    [0.2, '#9b9066'],
+                    [0.25, '#bcab67'],
+                    [0.4, '#f6ab2c'],
+                    [0.5, '#f6832c'],
+                    [0.7, '#f65d2c'],
+                    [0.9, '#dd2942'],
+                    [1.0, '#ff0800']
+                ],
             },
             customdata=np.stack(
                 (
@@ -70,25 +98,25 @@ def hedgehog(
         scene={
             "aspectmode": "cube",
             "xaxis": {
-                #"zerolinecolor": "white",
                 "showbackground": False,
                 "showticklabels": True,
             },
             "xaxis_title": "◀ Front - Rear ▶",
             "yaxis": {
-                #"zerolinecolor": "white",
                 "showbackground": False,
                 "showticklabels": True,
             },
             "yaxis_title": "◀ Left - Right ▶",
             "zaxis": {
-                #"zerolinecolor": "white",
                 "showbackground": False,
                 "showticklabels": True,
             },
             "zaxis_title": "◀ Up - Down ▶",
         },
     )
+
+    add_info_box(fig, signal_parameters)
+
     return fig
 
 def w_channel(
@@ -110,7 +138,7 @@ def w_channel(
             x=time,
             y=w_channel,
             line={
-                "color": "rebeccapurple",
+                "color": "rgba(255, 99, 71, 1)",
                 
             },
             customdata=time, 
@@ -155,9 +183,11 @@ def setup_plotly_layout() -> go.Figure:
         paper_bgcolor="#1f1b24",
         plot_bgcolor="#1f1b24",
         scene_camera=camera,
-        updatemenus=[{"buttons": buttons}],
-        showlegend=False,
-        
+        updatemenus=[{
+            "buttons": buttons,
+            "x": 0.05, 
+        }],
+        showlegend=False,   
     )
     return fig
 
@@ -208,40 +238,33 @@ def get_plotly_scenes() -> Tuple[Dict]:
     return camera, buttons
 
 
-def get_xy_projection(fig: go.Figure) -> go.Figure:
-    # Removing omnidireccional channel plot
-    traces = list(fig.data)
-    traces.pop(1)
-
-    # Creating new figure for xy projection
-    new_fig = make_subplots()
-    new_fig.add_trace(traces[0])
-
-    # Removing axes in Scatter plot
-    new_fig.update_layout(
-        scene={
-            "xaxis": {"visible": False},
-            "yaxis": {"visible": False},
-            "zaxis": {"visible": False},
-        }
+def add_info_box(fig: go.Figure, signal_parameters: dict) -> go.Figure:
+    info_text = (
+        f"<b>Threshold:</b> {signal_parameters['intensity_threshold']} dB<br>"
+        f"<b>Analysis Length:</b> {signal_parameters['analysis_length']} s<br>"
+        f"<b>Integration Window:</b> {signal_parameters['integration_time']} s<br>"
+        f"<b>Frequency Correction:</b> {signal_parameters['frequency_correction']}<br>"
     )
-
-    # Removing colorbar
-    new_fig.update_traces(marker_showscale=False)
-
-    # Setting cenital camera and cube mode
-    new_fig.update_layout(
-        scene={"aspectmode": "cube"},
-        scene_camera={
-            "up": {"x": 0, "y": 1, "z": 0},
-            "center": {"x": 0, "y": 0, "z": 0},
-            "eye": {"x": 0, "y": 0, "z": 1.5},
-        },
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
+    
+    fig.add_annotation(
+        text=info_text,
+        xref="paper", yref="paper",
+        x=1,
+        y=1,
+        showarrow=False,
+        align="left",
+        font=dict(
+            family="Arial",
+            size=14,
+            color="#FFF"
+        ),
+        bordercolor="#FFFFFF",
+        borderwidth=2,
+        borderpad=4,
+        bgcolor="#1f1b24",
+        opacity=1
     )
-
-    return new_fig
+    return fig
 
 
 def zero_inserter(array: np.ndarray) -> np.ndarray:
