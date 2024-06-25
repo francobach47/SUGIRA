@@ -10,21 +10,36 @@ def read_signals(input_data_dict: dict) -> dict:
     
     """
 
-    sample_rate = 48000
+    signals_dict = {}
+    signals_paths = {}
+    
+    sample_rate = ...
 
     for key_i, path_i in input_data_dict.items():
-        try:
-            signal, sample_rate = sf.read(path_i)
-            input_data_dict[key_i] = signal.T
-        except:
-            pass    
-    
-    input_data_dict["sample_rate"] = sample_rate
+
+        if key_i in ["front_left_up",
+                    "front_right_down",
+                    "back_right_up",
+                    "back_left_down",
+                    "stacked_signals",
+                    "inverse_filter",
+                    "x_channel",
+                    "y_channel",
+                    "z_channel",
+                    "w_channel"
+                ]:
+            try:
+                signal, sample_rate = sf.read(path_i)
+                signals_dict[key_i] = signal.T
+                signals_paths[key_i] = path_i
+            except:
+                pass    
+        signals_dict["sample_rate"] = sample_rate
 
     if input_data_dict["channels_per_file"] == 1:
         if input_data_dict["input_mode"] == "bformat":
             bformat_keys = ["w_channel", "x_channel", "y_channel", "z_channel"]
-            input_data_dict["stacked_signals"] = stack_dict_arrays(input_data_dict, bformat_keys)
+            signals_dict["stacked_signals"] = stack_dict_arrays(signals_dict, bformat_keys)
         else:
             aformat_keys = [
                 "front_left_up",
@@ -32,9 +47,12 @@ def read_signals(input_data_dict: dict) -> dict:
                 "back_right_up",
                 "back_left_down",
             ]
-            input_data_dict["stacked_signals"] = stack_dict_arrays(input_data_dict, aformat_keys)
-    
-    return input_data_dict
+            stacked_signals = stack_dict_arrays(signals_dict, aformat_keys)
+            signals_dict["stacked_signals"] = stacked_signals
+        
+    audio_data = {**input_data_dict, **signals_dict}
+
+    return audio_data, signals_paths
 
 
 def stack_dict_arrays(input_data_dict_array: dict, keys: List[str]) -> np.ndarray:

@@ -48,7 +48,6 @@ class LSSInputProcessor(InputProcessor):
 
         if input_dict["input_mode"] != InputFormat.LSS:
             return input_dict
-
         input_dict["stacked_signals"] = np.apply_along_axis(
             lambda array: fftconvolve(array, input_dict["inverse_filter"], mode="full"),
             axis=1,
@@ -79,6 +78,7 @@ class AFormatProcessor(InputProcessor):
 
         if input_dict["input_mode"] != InputFormat.AFORMAT:
             return input_dict
+        input_dict["stacked_signals"] = np.vstack(input_dict["stacked_signals"])
         input_dict["stacked_signals"] = convert_ambisonics_a_to_b(
             input_dict["stacked_signals"][0, :],
             input_dict["stacked_signals"][1, :],
@@ -97,20 +97,18 @@ class BFormatProcessor(InputProcessor):
         """
         Applies capsule and mic corrections.
         """
-
-        if input_dict["input_mode"] != InputFormat.BFORMAT and not bool(
-            input_dict["frequency_correction"]
-        ):
-            input_dict = input_dict
-
-        mic_corrector = CapsuleMicsCorrection(input_dict["sample_rate"])
-        input_dict["stacked_signals"][0, :] = mic_corrector.omni_correction(
-            input_dict["stacked_signals"][0, :]
-        )
-        input_dict["stacked_signals"][1:, :] = mic_corrector.axis_correction(
-            input_dict["stacked_signals"][1:, :]
-        )
-        input_dict["input_mode"] = InputFormat.BFORMAT
+        
+        if input_dict["input_mode"] != InputFormat.BFORMAT:
+            return input_dict
+        elif input_dict["input_mode"] == InputFormat.BFORMAT and not bool(input_dict["frequency_correction"]):
+            return input_dict
+        elif input_dict["input_mode"] == InputFormat.BFORMAT and bool(input_dict["frequency_correction"]):         
+            mic_corrector = CapsuleMicsCorrection(input_dict["sample_rate"])
+            input_dict["stacked_signals"] = np.vstack(input_dict["stacked_signals"])
+            input_dict["stacked_signals"][0, :] = mic_corrector.omni_correction(input_dict["stacked_signals"][0, :])
+            input_dict["stacked_signals"][1:, :] = mic_corrector.axis_correction(input_dict["stacked_signals"][1:, :])
+            input_dict["input_mode"] = InputFormat.BFORMAT            
+            return input_dict
 
         return input_dict
 

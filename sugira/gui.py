@@ -90,7 +90,7 @@ class MainWindowUI(object):
         self.frame_sugira_logo.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame_sugira_logo.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_sugira_logo.setFixedSize(350, 275)
-        self.frame_sugira_logo.setContentsMargins(0, 0, 0, 5)
+        self.frame_sugira_logo.setContentsMargins(0, 0, 0, 0)
         self.frame_sugira_logo.setObjectName("frame_sugira_logo")
 
         self.logo_layout = QtWidgets.QVBoxLayout(self.frame_sugira_logo)
@@ -132,7 +132,7 @@ class MainWindowUI(object):
         font_labels.setPointSize(13)
 
         vertical_space = QtWidgets.QSpacerItem(
-            20, 45, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed
+            20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed
         )
         vertical_space2 = QtWidgets.QSpacerItem(
             20, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed
@@ -249,30 +249,84 @@ class MainWindowUI(object):
         self.verticalLayout_6.addItem(vertical_space)
 
         # Frequency Correction - Low Pass Filter
-        self.radio_freq_correction = QtWidgets.QRadioButton(self.frame_analyze)
+        self.radio_freq_correction = QtWidgets.QCheckBox(self.frame_analyze)
         self.radio_freq_correction.setText("Low Pass Filter")
         self.radio_freq_correction.setChecked(True)
         self.radio_freq_correction.setFont(font_labels)
         self.radio_freq_correction.setStyleSheet(
             """
-            QRadioButton {
+            QCheckBox {
                 color: white;
                 font-size: 12pt;
             }
-            QRadioButton::indicator {
+            QCheckBox::indicator {
                 width: 15px;
                 height: 15px;
                 border-radius: 7px;
                 background-color: white;
                 border: 1px solid #1f1b24;
             }
-            QRadioButton::indicator:checked {
+            QCheckBox::indicator:checked {
                 background-color: rgba(255, 99, 71, 0.6);
                 border: 2px solid rgba(255, 99, 71, 1);
             }
         """
         )
         self.verticalLayout_6.addWidget(self.radio_freq_correction)
+        self.verticalLayout_6.addItem(vertical_space)
+
+        # COLORSCALE_TIME
+        self.time_colorscale = QtWidgets.QCheckBox(self.frame_analyze)
+        self.time_colorscale.setText("Time Colorscale")
+        self.time_colorscale.setChecked(True)
+        self.time_colorscale.setFont(font_labels)
+        self.time_colorscale.setStyleSheet(
+            """
+            QCheckBox {
+                color: white;
+                font-size: 12pt;
+            }
+            QCheckBox::indicator {
+                width: 15px;
+                height: 15px;
+                border-radius: 7px;
+                background-color: white;
+                border: 1px solid #1f1b24;
+            }
+            QCheckBox::indicator:checked {
+                background-color: rgba(255, 99, 71, 0.6);
+                border: 2px solid rgba(255, 99, 71, 1);
+            }
+        """
+        )
+        self.verticalLayout_6.addWidget(self.time_colorscale)
+        self.verticalLayout_6.addItem(vertical_space)
+
+        # W_CHANNEL - ENERGY
+        self.w_plot_energy = QtWidgets.QCheckBox(self.frame_analyze)
+        self.w_plot_energy.setText("W Channel Energy")
+        self.w_plot_energy.setChecked(False)
+        self.w_plot_energy.setFont(font_labels)
+        self.w_plot_energy.setStyleSheet(
+            """
+            QCheckBox {
+                color: white;
+                font-size: 12pt;
+            }
+            QCheckBox::indicator {
+                width: 15px;
+                height: 15px;
+                border-radius: 7px;
+                background-color: white;
+                border: 1px solid #1f1b24;
+            }
+            QCheckBox::indicator:checked {
+                background-color: rgba(255, 99, 71, 0.6);
+                border: 2px solid rgba(255, 99, 71, 1);
+            }
+        """
+        )
+        self.verticalLayout_6.addWidget(self.w_plot_energy)
         self.verticalLayout_6.addItem(vertical_space)
 
         # Push Buttons
@@ -366,7 +420,7 @@ class MainWindowUI(object):
         self.horizontalLayout_plan.setObjectName("horizontalLayout_plan")
 
         self.frame_inputs_plan = QtWidgets.QFrame(self.plan_section)
-        self.frame_inputs_plan.setFixedSize(350, 750)
+        self.frame_inputs_plan.setFixedSize(350, 775)
         self.frame_inputs_plan.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame_inputs_plan.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_inputs_plan.setObjectName("frame_inputs_plan")
@@ -380,24 +434,23 @@ class MainWindowUI(object):
         )
         self.sugiraLogoVerticalLayout_plan.setContentsMargins(0, 0, 0, 0)
         self.sugiraLogoVerticalLayout_plan.setSpacing(0)
-        self.sugiraLogoVerticalLayout_plan.setAlignment(QtCore.Qt.AlignCenter)
+        self.sugiraLogoVerticalLayout_plan.setAlignment(QtCore.Qt.AlignTop) 
 
         self.frame_sugira_logo_plan = QtWidgets.QFrame(self.frame_inputs_plan)
         self.frame_sugira_logo_plan.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame_sugira_logo_plan.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_sugira_logo_plan.setFixedSize(350, 270)
+        self.frame_sugira_logo_plan.setFixedSize(350, 275)
         self.frame_sugira_logo_plan.setObjectName("frame_sugira_logo_plan")
 
         self.logo_layout_plan = QtWidgets.QVBoxLayout(self.frame_sugira_logo_plan)
         self.logo_layout_plan.setContentsMargins(0, 0, 0, 0)
         self.logo_layout_plan.setSpacing(0)
         self.logo_layout_plan.setAlignment(QtCore.Qt.AlignCenter)
-        self.logo_layout_plan.setAlignment(QtCore.Qt.AlignCenter)
 
         self.label_logo_plan = QtWidgets.QLabel(self.frame_sugira_logo_plan)
         self.label_logo_plan.setText("SUGIRA Logo")
         self.label_logo_plan.setPixmap(
-            QtGui.QPixmap(str(Path("docs/images/sugira_full_logo.png")))
+            QtGui.QPixmap(str(Path("docs/images/1SIGURA_FINAL.png")))
         )
         self.label_logo_plan.setScaledContents(True)
         self.label_logo_plan.setObjectName("label_logo_plan")
@@ -407,10 +460,18 @@ class MainWindowUI(object):
         )
         self.sugiraLogoVerticalLayout_plan.addWidget(self.frame_sugira_logo_plan)
 
+        self.logo_buttons_spacer = QtWidgets.QSpacerItem(20, 100, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        self.sugiraLogoVerticalLayout_plan.addItem(self.logo_buttons_spacer)
+
         # Push Buttons for Plan Section
         self.frame_push_buttons_plan = QtWidgets.QFrame(self.frame_inputs_plan)
-        self.frame_push_buttons_plan.setLayout(QtWidgets.QVBoxLayout())
-        self.frame_push_buttons_plan.layout().setContentsMargins(0, 0, 0, 0)
+        self.frame_push_buttons_plan.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.frame_push_buttons_plan.setFrameShadow(QtWidgets.QFrame.Raised)
+
+        self.push_buttons_layout_plan = QtWidgets.QVBoxLayout(self.frame_push_buttons_plan)
+        self.push_buttons_layout_plan.setContentsMargins(0, 0, 0, 0)
+        # self.push_buttons_layout_plan.setSpacing(10)
+        self.push_buttons_layout_plan.setAlignment(QtCore.Qt.AlignCenter)
 
         # Load Plan
         self.pb_load_plan = QtWidgets.QPushButton(self.frame_push_buttons_plan)
@@ -468,7 +529,9 @@ class MainWindowUI(object):
             "integration_time": self.integration_options.currentData(),
             "analysis_length": float(self.analysis_length.text()) * 10 ** (-3),
             "intensity_threshold": float(self.threshold.text()),
-            "frequency_correction": self.radio_freq_correction.isChecked(),
+            "low_pass_key": self.radio_freq_correction.isChecked(),
+            "plot_energy": self.w_plot_energy.isChecked(),
+            "time_colorscale": self.time_colorscale.isChecked(),
         }
 
     def load_signals(self):
@@ -529,7 +592,9 @@ class MainWindowUI(object):
         self.graphics_holder.load(background_url)
         self.plan_view_holder.load(background_url)
 
-    def export_data(self): ...
+    def export_data(self):
+        
+        ...
 
     def load_plan(self):
         if self.signals_in_memory == False:
@@ -570,7 +635,7 @@ class MainWindowUI(object):
             None,
             "Load Plan",
             "",
-            "Image Files (*.png *.jpg *.jpeg);;All Files (*)",
+            "Image Files (*.png *.jpg *.jpeg *.JPG);;All Files (*)",
             options=options,
         )
 
@@ -939,6 +1004,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
                 signals_path = {
                     "input_mode": InputFormat.AFORMAT,
                     "channels_per_file": 1,
+                    "frequency_correction": True,
                     **signals_path,
                 }
 
@@ -955,22 +1021,23 @@ class LoadSignalsWindow(QtWidgets.QWidget):
                 signals_path = {
                     "input_mode": InputFormat.AFORMAT,
                     "channels_per_file": 4,
+                    "frequency_correction": True,
                     **signals_path,
                 }
 
         elif current_widget == self.b_format_tab:
             if self.b_format_4_channel_radio.isChecked():
                 signals_path = {
-                    "front_left_up": self.b_format_signal_layout.itemAtPosition(0, 2)
+                    "x_channel": self.b_format_signal_layout.itemAtPosition(0, 2)
                     .widget()
                     .text(),
-                    "front_right_down": self.b_format_signal_layout.itemAtPosition(1, 2)
+                    "y_channel": self.b_format_signal_layout.itemAtPosition(1, 2)
                     .widget()
                     .text(),
-                    "back_right_up": self.b_format_signal_layout.itemAtPosition(2, 2)
+                    "z_channel": self.b_format_signal_layout.itemAtPosition(2, 2)
                     .widget()
                     .text(),
-                    "back_left_down": self.b_format_signal_layout.itemAtPosition(3, 2)
+                    "w_channel": self.b_format_signal_layout.itemAtPosition(3, 2)
                     .widget()
                     .text(),
                 }
@@ -979,8 +1046,9 @@ class LoadSignalsWindow(QtWidgets.QWidget):
                     return {}
 
                 signals_path = {
-                    "input_mode": InputFormat.BFORMAT,
+                    "input_mode": "bformat",
                     "channels_per_file": 1,
+                    "frequency_correction": False,
                     **signals_path,
                 }
 
@@ -997,6 +1065,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
                 signals_path = {
                     "input_mode": InputFormat.BFORMAT,
                     "channels_per_file": 4,
+                    "frequency_correction": False,
                     **signals_path,
                 }
 
@@ -1025,6 +1094,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
             signals_path = {
                 "input_mode": InputFormat.LSS,
                 "channels_per_file": 1,
+                "frequency_correction": True,
                 **signals_path,
             }
 

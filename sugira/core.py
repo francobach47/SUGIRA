@@ -50,13 +50,13 @@ class SeaUrchinAnalyzer:
             Plotly figure with hedgehog and w-channel plot
         """
 
-        input_data_dict = read_signals(input_dict)
+        input_data_dict, signals_paths = read_signals(input_dict)
         sample_rate = input_data_dict["sample_rate"]
-
-        bformat_signals = self.input_builder.process(input_dict)
+        
+        bformat_signals = np.vstack(self.input_builder.process(input_data_dict))
 
         intensity_directions = bformat_to_intensity(
-            bformat_signals, sample_rate, signal_parameters["frequency_correction"]
+            bformat_signals, sample_rate, signal_parameters["low_pass_key"]
         )
 
         intensity_directions_cropped = crop_2d(
@@ -101,24 +101,43 @@ class SeaUrchinAnalyzer:
             azimuth_peaks,
             elevation_peaks,
             signal_parameters,
+            signals_paths
         )
 
-        w_channel_signal = w_preprocess(
+        # Energy or Amplitude
+        w_channel_signal, w_energy = w_preprocess(
             bformat_signals[0, :],
             int(signal_parameters["integration_time"] * sample_rate),
             signal_parameters["analysis_length"],
             sample_rate,
         )
 
-        export_data(time, w_channel_signal, reflex_to_direct, azimuth, elevation)
+        if signal_parameters["plot_energy"] is True:
+            yaxis = [np.min(w_energy) - 1, 0]    
+            title_xaxis = 'Energy [dB]'        
+            w_channel(
+                fig,
+                np.arange(0, signal_parameters["analysis_length"], 1 / sample_rate) * 1000,
+                w_energy,
+                yaxis,
+                title_xaxis,
+                signal_parameters["intensity_threshold"],
+                time,
+            )
+        else:
+            yaxis=[0, 1]     
+            title_xaxis = 'Amplitud'        
+            w_channel(
+                fig,
+                np.arange(0, signal_parameters["analysis_length"], 1 / sample_rate) * 1000,
+                w_channel_signal,
+                yaxis,
+                title_xaxis,
+                signal_parameters["intensity_threshold"],
+                time
+            )
 
-        w_channel(
-            fig,
-            np.arange(0, signal_parameters["analysis_length"], 1 / sample_rate) * 1000,
-            w_channel_signal,
-            signal_parameters["intensity_threshold"],
-            time,
-        )
+        export_data(time, w_channel_signal, reflex_to_direct, azimuth, elevation)
 
         generate_html(fig)
 

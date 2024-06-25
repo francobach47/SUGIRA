@@ -63,26 +63,62 @@ def hedgehog_plan_view(
     elevation_peaks: np.ndarray,
 ) -> go.Figure:
     """Create a hedgehog plot for Plan View Section."""
-    time_peaks *= 1000  # seconds to milliseconds
+    # time_peaks *= 1000  # seconds to milliseconds
     normalized_intensities = min_max_normalization(reflex_to_direct)
     x, y, z = spherical_to_cartesian(
         normalized_intensities, azimuth_peaks, elevation_peaks
     )
+    normalized_time_peaks = np.flip(min_max_normalization(time_peaks))
 
     fig.add_trace(
         go.Scatter3d(
             x=zero_inserter(x),
             y=zero_inserter(y),
             z=zero_inserter(z),
+            name="time_colorscale",
             marker={
-                "color": zero_inserter(normalized_intensities),
-                "colorscale": "inferno",
-                "size": 3,
+                "color": zero_inserter(normalized_time_peaks),                              
+                "colorscale": [
+                    [0.0, '#151d44'],
+                    [0.15, '#1c4d61'],
+                    [0.2, '#677a7d'],
+                    [0.25, '#5ea786'],
+                    [0.3, '#b6cbb0'],
+                    [0.4, '#fef6f4'],
+                    [0.5, '#e6b8a2'],
+                    [0.7, '#d4786a'],
+                    [0.8, '#ae4060'],
+                    [0.92, '#76195d'],
+                    [1.0, '#cb0000']
+                ],
+                "colorbar": {
+                    "thickness": 40,
+                    "tickmode": "array",
+                    "tickvals": np.linspace(0,1,10),
+                    "ticktext": [f"{val: .1f}ms" for val in np.linspace(np.max(time_peaks),np.min(time_peaks),10)],
+                    "title": {
+                        "text": "<b>Time</b>",
+                        "side": "top",
+                        },
+                },
+                "size": 1,
             },
             line={
-                "width": 6,
-                "color": zero_inserter(normalized_intensities),
-                "colorscale": "inferno",
+                "width": 8,
+                "color": zero_inserter(normalized_time_peaks),                
+                "colorscale": [
+                    [0.0, '#151d44'],
+                    [0.1, '#1c4d61'],
+                    [0.15, '#677a7d'],
+                    [0.2, '#5ea786'],
+                    [0.25, '#b6cbb0'],
+                    [0.3, '#fef6f4'],
+                    [0.4, '#e6b8a2'],
+                    [0.5, '#d4786a'],
+                    [0.7, '#ae4060'],
+                    [0.92, '#76195d'],
+                    [1.0, '#cb0000']
+                ],
             },
             customdata=np.stack(
                 (
@@ -95,12 +131,11 @@ def hedgehog_plan_view(
             ),
             hovertemplate="<b>Reflection-to-direct [dB]:</b> %{customdata[0]:.2f} dB <br>"
             + "<b>Time [ms]: </b>%{customdata[1]:.2f} ms <br>"
-            + "<b>Azimuth [°]: </b>%{customdata[2]: .2f}° <br>"
-            + "<b>Elevation [°]: </b>%{customdata[3]: .2f}° <extra></extra>",
+            + "<b>Azimuth [°]: </b>%{customdata[2]:.2f}° <br>"
+            + "<b>Elevation [°]: </b>%{customdata[3]:.2f}° <extra></extra>",
             showlegend=False,
-        )
+        ),
     )
-
     return fig
 
 

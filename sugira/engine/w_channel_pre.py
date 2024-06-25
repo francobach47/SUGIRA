@@ -15,5 +15,8 @@ def w_preprocess(
     w_channel_cropped = np.abs(crop_1d(w_channel, analysis_length, sample_rate))
     w_channel_filtered = moving_average(w_channel_cropped, int(window_size / 2))
     w_channel_filtered /= np.max(w_channel_filtered)
+    
+    #PRUEBA DE ENERGIA
+    w_db = 10 * np.log10(w_channel_filtered**2)
 
-    return w_channel_filtered
+    return w_channel_filtered, w_db
