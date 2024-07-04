@@ -1,4 +1,4 @@
-## Sea Urchin Grapher - Impulse Response Ambisonic
+# Sea Urchin Grapher - Impulse Response Ambisonic
 
 <div align="center">
     <img src="docs/images/sugira_full_logo.png" alt="Logo" height="325"/>
