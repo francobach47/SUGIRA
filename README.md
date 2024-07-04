@@ -8,7 +8,7 @@
 ---
 
 <b>SUGIRA (Sea Urchin Grapher - Impulse Response Ambisonic)</b> is a software for visualizing Ambisonics impulse responses in 3D. It allows you to export data related to Azimuth, Elevation, Intensity, and the W channel over time. Additionally, it features a section where you can load a plan image and overlay the hedgehog plot on it, resize it, and rotate it to align the direct sound with the direction of the source in the three planes.
-Read more about SUGIRA here.
+Read more about SUGIRA [here](https://drive.google.com/file/d/1BvkgkqBQRwxJuq8CgkdBS87597I2_OER/view?usp=sharing).
 
 <div align="center">
     <img src="docs/images/GUI1_Main.png" alt="Logo" />
