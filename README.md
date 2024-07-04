@@ -11,11 +11,11 @@
 Read more about SUGIRA here.
 
 <div align="center">
-    <img src="docs/images/GUI1_Main.png" alt="Logo" height="325"/>
+    <img src="docs/images/GUI1_Main.png" alt="Logo" />
 </div>
 
 <div align="center">
-    <img src="docs/images/GUI2_PLAN.png" alt="Logo" height="325"/>
+    <img src="docs/images/GUI2_PLAN.png" alt="Logo" />
 </div>
 
  ---
