@@ -7,6 +7,7 @@ from engine.plot_plan_view import put_background_image
 from typing import List
 from engine.input import InputFormat
 from core import SeaUrchinAnalyzer
+import zipfile
 
 
 class MainWindowUI(object):
@@ -597,7 +598,20 @@ class MainWindowUI(object):
         self.graphics_holder.load(background_url)
         self.plan_view_holder.load(background_url)
 
-    def export_data(self): ...
+    def export_data(self):
+        sugira_html_path = QtCore.QFileInfo("sugira.html").absoluteFilePath()
+        hedgehog_txt_path = QtCore.QFileInfo("hedgehog.txt").absoluteFilePath()
+        w_channel_txt_path = QtCore.QFileInfo("w_channel.txt").absoluteFilePath()
+
+        save_dir = QtWidgets.QFileDialog.getExistingDirectory(
+            None, "Directory to save measurements data"
+        )
+        if save_dir:
+            zip_file_path = Path(save_dir) / "sugira.zip"
+            with zipfile.ZipFile(zip_file_path, "w") as zipf:
+                zipf.write(sugira_html_path, arcname="sugira.html")
+                zipf.write(hedgehog_txt_path, arcname="hedgehog.txt")
+                zipf.write(w_channel_txt_path, arcname="w_channel.txt")
 
     def load_plan(self):
         if self.signals_in_memory == False:

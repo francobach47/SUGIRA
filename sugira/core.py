@@ -52,7 +52,7 @@ class SeaUrchinAnalyzer:
 
         input_data_dict, signals_paths = read_signals(input_dict)
         sample_rate = input_data_dict["sample_rate"]
-        
+
         bformat_signals = np.vstack(self.input_builder.process(input_data_dict))
 
         intensity_directions = bformat_to_intensity(
@@ -101,10 +101,13 @@ class SeaUrchinAnalyzer:
             azimuth_peaks,
             elevation_peaks,
             signal_parameters,
-            signals_paths
+            signals_paths,
         )
 
         # Energy or Amplitude
+        time_w_channel = (
+            np.arange(0, signal_parameters["analysis_length"], 1 / sample_rate) * 1000
+        )
         w_channel_signal, w_energy = w_preprocess(
             bformat_signals[0, :],
             int(signal_parameters["integration_time"] * sample_rate),
@@ -113,11 +116,11 @@ class SeaUrchinAnalyzer:
         )
 
         if signal_parameters["plot_energy"] is True:
-            yaxis = [np.min(w_energy) - 1, 0]    
-            title_xaxis = 'Energy [dB]'        
+            yaxis = [np.min(w_energy) - 1, 0]
+            title_xaxis = "Energy [dB]"
             w_channel(
                 fig,
-                np.arange(0, signal_parameters["analysis_length"], 1 / sample_rate) * 1000,
+                time_w_channel,
                 w_energy,
                 yaxis,
                 title_xaxis,
@@ -125,19 +128,21 @@ class SeaUrchinAnalyzer:
                 time,
             )
         else:
-            yaxis=[0, 1]     
-            title_xaxis = 'Amplitud'        
+            yaxis = [0, 1]
+            title_xaxis = "Amplitud"
             w_channel(
                 fig,
-                np.arange(0, signal_parameters["analysis_length"], 1 / sample_rate) * 1000,
+                time_w_channel,
                 w_channel_signal,
                 yaxis,
                 title_xaxis,
                 signal_parameters["intensity_threshold"],
-                time
+                time,
             )
 
-        export_data(time, w_channel_signal, reflex_to_direct, azimuth, elevation)
+        export_data(
+            time, time_w_channel, w_channel_signal, reflex_to_direct, azimuth, elevation
+        )
 
         generate_html(fig)
 

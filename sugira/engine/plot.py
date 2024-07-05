@@ -1,4 +1,5 @@
 """Plotting functions."""
+
 from typing import Tuple, Dict
 import numpy as np
 import plotly.graph_objects as go
@@ -15,19 +16,19 @@ def hedgehog(
     azimuth_peaks: np.ndarray,
     elevation_peaks: np.ndarray,
     signal_parameters: dict,
-    signals_paths: dict
+    signals_paths: dict,
 ) -> go.Figure:
     """
     Create a hedgehog plot.
     """
-    
+
     time_peaks *= 1000  # seconds to miliseconds
     normalized_intensities = min_max_normalization(reflex_to_direct)
     x, y, z = spherical_to_cartesian(
         normalized_intensities, azimuth_peaks, elevation_peaks
     )
     normalized_time_peaks = np.flip(min_max_normalization(time_peaks))
-        
+
     if signal_parameters["time_colorscale"] is True:
         fig.add_trace(
             go.Scatter3d(
@@ -36,47 +37,52 @@ def hedgehog(
                 z=zero_inserter(z),
                 name="time_colorscale",
                 marker={
-                    "color": zero_inserter(normalized_time_peaks),                              
+                    "color": zero_inserter(normalized_time_peaks),
                     "colorscale": [
-                        [0.0, '#151d44'],
-                        [0.15, '#1c4d61'],
-                        [0.2, '#677a7d'],
-                        [0.25, '#5ea786'],
-                        [0.3, '#b6cbb0'],
-                        [0.4, '#fef6f4'],
-                        [0.5, '#e6b8a2'],
-                        [0.7, '#d4786a'],
-                        [0.8, '#ae4060'],
-                        [0.92, '#76195d'],
-                        [1.0, '#cb0000']
+                        [0.0, "#151d44"],
+                        [0.15, "#1c4d61"],
+                        [0.2, "#677a7d"],
+                        [0.25, "#5ea786"],
+                        [0.3, "#b6cbb0"],
+                        [0.4, "#fef6f4"],
+                        [0.5, "#e6b8a2"],
+                        [0.7, "#d4786a"],
+                        [0.8, "#ae4060"],
+                        [0.92, "#76195d"],
+                        [1.0, "#cb0000"],
                     ],
                     "colorbar": {
                         "thickness": 40,
                         "tickmode": "array",
-                        "tickvals": np.linspace(0,1,10),
-                        "ticktext": [f"{val: .1f}ms" for val in np.linspace(np.max(time_peaks),np.min(time_peaks),10)],
+                        "tickvals": np.linspace(0, 1, 10),
+                        "ticktext": [
+                            f"{val: .1f}ms"
+                            for val in np.linspace(
+                                np.max(time_peaks), np.min(time_peaks), 10
+                            )
+                        ],
                         "title": {
                             "text": "<b>Time</b>",
                             "side": "top",
-                            },
+                        },
                     },
                     "size": 3,
                 },
                 line={
                     "width": 8,
-                    "color": zero_inserter(normalized_time_peaks),                
+                    "color": zero_inserter(normalized_time_peaks),
                     "colorscale": [
-                        [0.0, '#151d44'],
-                        [0.1, '#1c4d61'],
-                        [0.15, '#677a7d'],
-                        [0.2, '#5ea786'],
-                        [0.25, '#b6cbb0'],
-                        [0.3, '#fef6f4'],
-                        [0.4, '#e6b8a2'],
-                        [0.5, '#d4786a'],
-                        [0.7, '#ae4060'],
-                        [0.92, '#76195d'],
-                        [1.0, '#cb0000']
+                        [0.0, "#151d44"],
+                        [0.1, "#1c4d61"],
+                        [0.15, "#677a7d"],
+                        [0.2, "#5ea786"],
+                        [0.25, "#b6cbb0"],
+                        [0.3, "#fef6f4"],
+                        [0.4, "#e6b8a2"],
+                        [0.5, "#d4786a"],
+                        [0.7, "#ae4060"],
+                        [0.92, "#76195d"],
+                        [1.0, "#cb0000"],
                     ],
                 },
                 customdata=np.stack(
@@ -103,30 +109,35 @@ def hedgehog(
                 x=zero_inserter(x),
                 y=zero_inserter(y),
                 z=zero_inserter(z),
-                name="intensity_colorscale",                
+                name="intensity_colorscale",
                 marker={
-                    "color": zero_inserter(normalized_intensities),      
+                    "color": zero_inserter(normalized_intensities),
                     "colorscale": [
-                        [0.0, '#353535'],
-                        [0.1, '#595854'],
-                        [0.15, '#7d7967'],
-                        [0.2, '#9b9066'],
-                        [0.25, '#bcab67'],
-                        [0.4, '#f6ab2c'],
-                        [0.5, '#f6832c'],
-                        [0.7, '#f65d2c'],
-                        [0.9, '#e12121'],
-                        [1.0, '#cb0000']
+                        [0.0, "#353535"],
+                        [0.1, "#595854"],
+                        [0.15, "#7d7967"],
+                        [0.2, "#9b9066"],
+                        [0.25, "#bcab67"],
+                        [0.4, "#f6ab2c"],
+                        [0.5, "#f6832c"],
+                        [0.7, "#f65d2c"],
+                        [0.9, "#e12121"],
+                        [1.0, "#cb0000"],
                     ],
                     "colorbar": {
                         "thickness": 40,
                         "tickmode": "array",  # Specify array mode for tick values
-                        "tickvals": np.linspace(0,1,10),
-                        "ticktext": [f"{val: .1f}dB" for val in np.linspace(np.min(reflex_to_direct),np.max(reflex_to_direct),10)],
+                        "tickvals": np.linspace(0, 1, 10),
+                        "ticktext": [
+                            f"{val: .1f}dB"
+                            for val in np.linspace(
+                                np.min(reflex_to_direct), np.max(reflex_to_direct), 10
+                            )
+                        ],
                         "title": {
-                           "text": "<b>Level</b>",
-                           "side": "top",
-                           },
+                            "text": "<b>Level</b>",
+                            "side": "top",
+                        },
                     },
                     "size": 3,
                 },
@@ -134,19 +145,18 @@ def hedgehog(
                     "width": 8,
                     "color": zero_inserter(normalized_intensities),
                     "colorscale": [
-                        [0.0, '#353535'],
-                        [0.1, '#595854'],
-                        [0.15, '#7d7967'],
-                        [0.2, '#9b9066'],
-                        [0.25, '#bcab67'],
-                        [0.4, '#f6ab2c'],
-                        [0.5, '#f6832c'],
-                        [0.7, '#f65d2c'],
-                        [0.9, '#e12121'],
-                        [1.0, '#cb0000']
+                        [0.0, "#353535"],
+                        [0.1, "#595854"],
+                        [0.15, "#7d7967"],
+                        [0.2, "#9b9066"],
+                        [0.25, "#bcab67"],
+                        [0.4, "#f6ab2c"],
+                        [0.5, "#f6832c"],
+                        [0.7, "#f65d2c"],
+                        [0.9, "#e12121"],
+                        [1.0, "#cb0000"],
                     ],
                 },
-
                 customdata=np.stack(
                     (
                         zero_inserter(reflex_to_direct),
@@ -170,29 +180,30 @@ def hedgehog(
         scene={
             "aspectmode": "cube",
             "xaxis": {
-                #"zerolinecolor": "white",
+                # "zerolinecolor": "white",
                 "showbackground": False,
                 "showticklabels": True,
             },
             "xaxis_title": "◀ Front - Rear ▶",
             "yaxis": {
-                #"zerolinecolor": "white",
+                # "zerolinecolor": "white",
                 "showbackground": False,
                 "showticklabels": True,
             },
             "yaxis_title": "◀ Left - Right ▶",
             "zaxis": {
-                #"zerolinecolor": "white",
+                # "zerolinecolor": "white",
                 "showbackground": False,
                 "showticklabels": True,
             },
             "zaxis_title": "◀ Up - Down ▶",
         },
     )
-    
+
     add_info_box(fig, signal_parameters, signals_paths)
 
     return fig
+
 
 def w_channel(
     fig: go.Figure,
@@ -216,9 +227,8 @@ def w_channel(
             y=w_channel,
             line={
                 "color": "rgba(255, 99, 71, 1)",
-                
             },
-            customdata=time, 
+            customdata=time,
             hovertemplate="<b>Time [ms]:</b> %{customdata:.2f} ms <extra></extra>",
             showlegend=False,
         )
@@ -226,6 +236,7 @@ def w_channel(
     fig.update_layout(yaxis_range=yaxis, xaxis_range=[0, max(time)])
     fig.update_xaxes(title_text="Time [ms]", row=2, col=1)
     fig.update_yaxes(title_text=title_xaxis, row=2, col=1)
+
 
 def setup_plotly_layout() -> go.Figure:
     """_summary_
@@ -259,11 +270,13 @@ def setup_plotly_layout() -> go.Figure:
         paper_bgcolor="#1f1b24",
         plot_bgcolor="#1f1b24",
         scene_camera=camera,
-        updatemenus=[{
-            "buttons": buttons,
-            "x": 0.05, 
-        }],
-        showlegend=False,   
+        updatemenus=[
+            {
+                "buttons": buttons,
+                "x": 0.05,
+            }
+        ],
+        showlegend=False,
     )
     return fig
 
@@ -314,56 +327,52 @@ def get_plotly_scenes() -> Tuple[Dict]:
     return camera, buttons
 
 
-def add_info_box(fig: go.Figure, signal_parameters: dict, signals_paths: dict) -> go.Figure:
+def add_info_box(
+    fig: go.Figure, signal_parameters: dict, signals_paths: dict
+) -> go.Figure:
     info_text_parameters = (
         f"<b>Threshold:</b> {signal_parameters['intensity_threshold']} dB<br>"
         f"<b>Analysis Length:</b> {signal_parameters['analysis_length']} s<br>"
         f"<b>Integration Window:</b> {signal_parameters['integration_time']} s<br>"
         f"<b>Low Pass Filter:</b> {signal_parameters['low_pass_key']}<br>"
     )
-    
+
     info_text_paths = [f"{Path(value).name}" for _, value in signals_paths.items()]
-    info_text_paths.insert(0, "<b>Audio Paths</b>")
-    info_text_paths = "<br>".join(info_text_paths) 
+    info_text_paths.insert(0, "<b>Audio Files</b>")
+    info_text_paths = "<br>".join(info_text_paths)
 
     fig.add_annotation(
         text=info_text_parameters,
-        xref="paper", yref="paper",
+        xref="paper",
+        yref="paper",
         x=1,
         y=1,
         showarrow=False,
         align="left",
-        font=dict(
-            family="Arial",
-            size=14,
-            color="#FFF"
-        ),
+        font=dict(family="Arial", size=14, color="#FFF"),
         bordercolor="#FFFFFF",
         borderwidth=2,
         borderpad=4,
         bgcolor="#1f1b24",
-        opacity=1
+        opacity=1,
     )
 
     fig.add_annotation(
         text=info_text_paths,
-        xref="paper", yref="paper",
+        xref="paper",
+        yref="paper",
         x=1,
         y=0.85,
         showarrow=False,
         align="left",
-        font=dict(
-            family="Arial",
-            size=14,
-            color="#FFF"
-        ),
+        font=dict(family="Arial", size=14, color="#FFF"),
         bordercolor="#FFFFFF",
         borderwidth=2,
         borderpad=4,
         bgcolor="#1f1b24",
-        opacity=1
+        opacity=1,
     )
-    
+
     return fig
 
 
