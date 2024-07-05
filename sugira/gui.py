@@ -15,6 +15,7 @@ class MainWindowUI(object):
     """
 
     signals_in_memory = False
+    has_plane = False
 
     def main_window_config(self, MainWindow: QtWidgets.QMainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -642,6 +643,7 @@ class MainWindowUI(object):
         )
 
         if file_name:
+            self.has_plane = True
             self.process_plan(file_name)
 
     def process_plan(self, plan_image: str):
@@ -652,19 +654,51 @@ class MainWindowUI(object):
         self.plan_view_holder.load(url)
 
     def export_plan_view(self):
-        image = QtGui.QImage(self.plan_view_holder.grab().toImage())
-        options = QtWidgets.QFileDialog.Options()
-        default_dir = str(Path(__file__).parent.absolute().parent)
-        default_file = "plan_view_sugira.png"
-        file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
-            None,
-            "Save Image",
-            default_dir + "/" + default_file,
-            "Images (*.png *.jpg *.jpeg);;All Files (*)",
-            options=options,
-        )
-        if file_path:
-            image.save(file_path)
+        if self.signals_in_memory is False or self.has_plane is False:
+            msg_box = QtWidgets.QMessageBox()
+            msg_box.setIcon(QtWidgets.QMessageBox.Warning)
+            msg_box.setWindowTitle("Invalid Signals")
+            msg_box.setText("There are no signals or plan loaded.")
+            msg_box.setStyleSheet(
+                """
+                QMessageBox {
+                    background-color: #2f2c33;
+                    color: white;
+                    border: 2px solid #a0a0a0;
+                }
+                QMessageBox QLabel {
+                    color: white;
+                }
+                QMessageBox QPushButton {
+                    background-color: white;
+                    color: black;
+                    border: 2px solid #1f1b24;
+                    padding: 5px;
+                    border-radius: 5px;
+                    icon-size: 0px;
+                }
+                QMessageBox QPushButton:hover {
+                    background-color: rgba(255, 99, 71, 0.6);
+                    border: 2px solid rgba(255, 99, 71, 1);
+                }
+            """
+            )
+            msg_box.exec_()
+
+        else:
+            image = QtGui.QImage(self.plan_view_holder.grab().toImage())
+            options = QtWidgets.QFileDialog.Options()
+            default_dir = str(Path(__file__).parent.absolute().parent)
+            default_file = "plan_view_sugira.png"
+            file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+                None,
+                "Save Image",
+                default_dir + "/" + default_file,
+                "Images (*.png *.jpg *.jpeg);;All Files (*)",
+                options=options,
+            )
+            if file_path:
+                image.save(file_path)
 
 
 class LoadSignalsWindow(QtWidgets.QWidget):
