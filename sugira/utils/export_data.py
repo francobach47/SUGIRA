@@ -11,22 +11,22 @@ def export_data(
     filename: str = "sugira_data.txt",
 ) -> None:
     """
-    Exports intensity, azimuth and elevation data in .txt file.
+    Exports intensity, azimuth, and elevation data to a .txt file.
 
     Parameters
     ----------
-    time: np.ndarray,
-        ...
-    w_channel: np.ndarray,
-        ...
+    time : np.ndarray
+        Array of time values in milliseconds.
+    w_channel : np.ndarray
+        W channel array.
     intensity : np.ndarray
         Intensity array.
     azimuth : np.ndarray
         Azimuth array.
-    Elevation : np.ndarray
+    elevation : np.ndarray
         Elevation array.
-    filename : str
-        .txt file name.
+    filename : str, optional
+        Name of the .txt file to save the data, by default "sugira_data.txt".
     """
 
     with open(filename, "w", encoding="utf-8") as file:

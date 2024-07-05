@@ -434,7 +434,7 @@ class MainWindowUI(object):
         )
         self.sugiraLogoVerticalLayout_plan.setContentsMargins(0, 0, 0, 0)
         self.sugiraLogoVerticalLayout_plan.setSpacing(0)
-        self.sugiraLogoVerticalLayout_plan.setAlignment(QtCore.Qt.AlignTop) 
+        self.sugiraLogoVerticalLayout_plan.setAlignment(QtCore.Qt.AlignTop)
 
         self.frame_sugira_logo_plan = QtWidgets.QFrame(self.frame_inputs_plan)
         self.frame_sugira_logo_plan.setFrameShape(QtWidgets.QFrame.NoFrame)
@@ -460,7 +460,9 @@ class MainWindowUI(object):
         )
         self.sugiraLogoVerticalLayout_plan.addWidget(self.frame_sugira_logo_plan)
 
-        self.logo_buttons_spacer = QtWidgets.QSpacerItem(20, 100, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        self.logo_buttons_spacer = QtWidgets.QSpacerItem(
+            20, 100, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed
+        )
         self.sugiraLogoVerticalLayout_plan.addItem(self.logo_buttons_spacer)
 
         # Push Buttons for Plan Section
@@ -468,7 +470,9 @@ class MainWindowUI(object):
         self.frame_push_buttons_plan.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame_push_buttons_plan.setFrameShadow(QtWidgets.QFrame.Raised)
 
-        self.push_buttons_layout_plan = QtWidgets.QVBoxLayout(self.frame_push_buttons_plan)
+        self.push_buttons_layout_plan = QtWidgets.QVBoxLayout(
+            self.frame_push_buttons_plan
+        )
         self.push_buttons_layout_plan.setContentsMargins(0, 0, 0, 0)
         # self.push_buttons_layout_plan.setSpacing(10)
         self.push_buttons_layout_plan.setAlignment(QtCore.Qt.AlignCenter)
@@ -592,9 +596,7 @@ class MainWindowUI(object):
         self.graphics_holder.load(background_url)
         self.plan_view_holder.load(background_url)
 
-    def export_data(self):
-        
-        ...
+    def export_data(self): ...
 
     def load_plan(self):
         if self.signals_in_memory == False:
@@ -1151,6 +1153,7 @@ class LoadSignalsWindow(QtWidgets.QWidget):
 if __name__ == "__main__":
     sys.argv.append("--no-sandbox")
     app = QtWidgets.QApplication(sys.argv)
+    app.setStyle("Fusion")
     MainWindow = QtWidgets.QMainWindow()
     ui = MainWindowUI()
     ui.main_window_config(MainWindow)
