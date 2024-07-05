@@ -17,7 +17,6 @@ pyqt5-qt5 = "5.15.2"
 pyqtwebengine = "5.15.3"
 qtpy = "^2.4.1"
 pyqt5 = "^5.15.10"
-pyqtwebkit = "^5.15.2"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^3.6.2"
