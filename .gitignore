@@ -162,4 +162,5 @@ cython_debug/
 sugira.html
 sugira_plan_view.json
 sugira_plan_view.html
-sugira_data.txt
+hedgehog.txt
+w_channel.txt
